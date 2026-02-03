@@ -1,0 +1,31 @@
+# Railway Ignore File
+# Files and folders to exclude from Railway deployment
+
+# Documentation
+*.md
+!README.md
+
+# Test files
+testsprite_tests/
+*.test.ts
+*.spec.ts
+
+# Local development
+.vscode/
+.idea/
+
+# Backups
+backups/
+
+# Scripts
+*.ps1
+*.sh
+
+# Local media (use Cloudinary instead)
+images/
+video/
+
+# Temporary files
+tmp/
+*.tmp
+*.log

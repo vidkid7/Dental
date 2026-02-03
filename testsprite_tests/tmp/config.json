@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000/admin",
+  "executionArgs": {
+    "projectName": "DENTAL",
+    "projectPath": "d:\\DENTAL",
+    "testIds": [],
+    "additionalInstruction": "Focus on testing all admin panel CRUD operations: Doctors, Appointments, Services, Testimonials, Blog, Enquiries, Users, Gallery, Media, and Content Pages. Verify all create, read, update, delete operations work correctly with the backend database.",
+    "envs": {
+      "API_KEY": "sk-user-gqd-ep8fWZzpFTmMASJXyAbLsmehBCqUXy_cW7KtOgHf0S1mDmsL8PyShuK_Jcx5VCsuDxuwMgnSzMmyUSiGsRk3Up8gHGiygMGAQKvBZo4w-ICvAMm7RigfqmwJb_9n1E0"
+    }
+  },
+  "proxy": "http://41c72426-b726-4268-92c8-ef12cd89e859:IQpuSIh0xnMhFUI3bSQowDVjiY9otMTU@tun.testsprite.com:8080"
+}
