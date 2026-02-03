@@ -1,0 +1,38 @@
+/**
+ * Quick script to verify PostgreSQL database connection.
+ * Run from backend folder: npx ts-node -r tsconfig-paths/register scripts/check-database.ts
+ * Or: npm run db:check (if we add the script)
+ */
+import { DataSource } from 'typeorm';
+import { config } from 'dotenv';
+import * as path from 'path';
+
+config({ path: path.join(__dirname, '../.env') });
+
+async function checkDatabase() {
+  const dataSource = new DataSource({
+    type: 'postgres',
+    host: process.env.DATABASE_HOST || 'localhost',
+    port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+    username: process.env.DATABASE_USER || 'dental_user',
+    password: process.env.DATABASE_PASSWORD || 'dental_password',
+    database: process.env.DATABASE_NAME || 'dental_db',
+  });
+
+  try {
+    await dataSource.initialize();
+    const result = await dataSource.query('SELECT 1 as ok');
+    await dataSource.destroy();
+    console.log('✅ Database connected and working');
+    console.log('   Host:', process.env.DATABASE_HOST || 'localhost');
+    console.log('   Database:', process.env.DATABASE_NAME || 'dental_db');
+    console.log('   Ping result:', result);
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Database connection failed:');
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+checkDatabase();
