@@ -1,48 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// Images replaced with placeholders for development
 import { FiChevronLeft, FiChevronRight, FiStar } from 'react-icons/fi';
 import { FaQuoteLeft } from 'react-icons/fa';
+import { get } from '@/lib/api';
 
-const testimonials = [
-  {
-    id: 1,
-    name: 'Sarah Johnson',
-    role: 'Patient',
-    content: 'The care I received at Premier Dental was exceptional. The staff was incredibly professional, and the dentist took the time to explain every procedure. I\'ve never felt more comfortable at a dental clinic.',
-    rating: 5,
-    image: '/images/testimonial-1.jpg',
-  },
-  {
-    id: 2,
-    name: 'Dr. James Wilson',
-    role: 'BDS Alumni 2018',
-    content: 'My education at Premier Dental College prepared me exceptionally well for my career. The clinical exposure and mentorship I received were invaluable. I\'m now running my own successful practice.',
-    rating: 5,
-    image: '/images/testimonial-2.jpg',
-  },
-  {
-    id: 3,
-    name: 'Emily Chen',
-    role: 'Parent',
-    content: 'Finding a dentist my kids actually want to visit was a miracle! The pediatric team is amazing - patient, gentle, and great at making dental visits fun. Both my children now love going to the dentist.',
-    rating: 5,
-    image: '/images/testimonial-3.jpg',
-  },
-  {
-    id: 4,
-    name: 'Michael Rodriguez',
-    role: 'Patient',
-    content: 'After years of avoiding dentists, I finally found one I trust. The entire team made me feel at ease, and the results of my smile makeover exceeded all my expectations.',
-    rating: 5,
-    image: '/images/testimonial-4.jpg',
-  },
-];
+interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  content: string;
+  rating: number;
+  isActive: boolean;
+  order: number;
+}
 
 export function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch testimonials from API
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        setLoading(true);
+        const response = await get<Testimonial[]>('testimonials', {
+          params: { 
+            sortBy: 'order', 
+            sortOrder: 'asc'
+          },
+        });
+        // Filter only active testimonials
+        const activeTestimonials = (response || []).filter(t => t.isActive);
+        setTestimonials(activeTestimonials);
+      } catch (error) {
+        console.error('Failed to load testimonials', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
 
   const next = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
@@ -51,6 +52,23 @@ export function TestimonialsSection() {
   const prev = () => {
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
+
+  if (loading) {
+    return (
+      <section className="section-padding bg-gradient-to-br from-primary-50 to-accent-50">
+        <div className="container-custom">
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            <p className="text-neutral-500 text-lg mt-4">Loading testimonials...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return null; // Don't show section if no testimonials
+  }
 
   return (
     <section className="section-padding bg-gradient-to-br from-primary-50 to-accent-50">

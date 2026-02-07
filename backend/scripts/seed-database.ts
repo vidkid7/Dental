@@ -125,7 +125,7 @@ async function seedDatabase() {
     }
     console.log('\n📊 Seeded data:');
     console.log('   - Users, Departments, Academic Programs');
-    console.log('   - Doctors (8), Services (8), Testimonials (6)');
+    console.log('   - Doctors (10), Services (11), Testimonials (6)');
     console.log('   - Blog Posts (3), Gallery Items (8)');
     console.log('   - Clinic Information');
     console.log('   - All Page Content (Home, About, Services, etc.)');

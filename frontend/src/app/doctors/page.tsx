@@ -1,109 +1,68 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { FiSearch, FiCalendar, FiPhone, FiAward, FiClock } from 'react-icons/fi';
 import { Input } from '@/components/ui/Input';
+import { get, PaginatedResponse } from '@/lib/api';
+import { toast } from 'react-hot-toast';
 
-const doctors = [
-  {
-    id: '1',
-    name: 'Dr. Bikash Sharma',
-    specialization: 'General Dentistry',
-    qualification: 'BDS, NMC Registered',
-    experience: 12,
-    about: 'Expert in general dental care, preventive dentistry, and restorative treatments.',
-    languages: ['Nepali', 'English', 'Hindi'],
-    available: true,
-  },
-  {
-    id: '2',
-    name: 'Dr. Sunita Thapa',
-    specialization: 'Orthodontics',
-    qualification: 'BDS, MDS (Orthodontics)',
-    experience: 8,
-    about: 'Specialist in braces, aligners, and teeth alignment treatments.',
-    languages: ['Nepali', 'English'],
-    available: true,
-  },
-  {
-    id: '3',
-    name: 'Dr. Ram Prasad KC',
-    specialization: 'Oral Surgery',
-    qualification: 'BDS, MDS (OMFS)',
-    experience: 15,
-    about: 'Experienced oral surgeon specializing in extractions, implants, and jaw surgeries.',
-    languages: ['Nepali', 'English', 'Hindi'],
-    available: true,
-  },
-  {
-    id: '4',
-    name: 'Dr. Anita Gurung',
-    specialization: 'Endodontics',
-    qualification: 'BDS, MDS (Endodontics)',
-    experience: 10,
-    about: 'Root canal specialist with expertise in saving damaged teeth.',
-    languages: ['Nepali', 'English'],
-    available: true,
-  },
-  {
-    id: '5',
-    name: 'Dr. Suman Adhikari',
-    specialization: 'Prosthodontics',
-    qualification: 'BDS, MDS (Prostho)',
-    experience: 9,
-    about: 'Expert in dental crowns, bridges, dentures, and smile makeovers.',
-    languages: ['Nepali', 'English'],
-    available: true,
-  },
-  {
-    id: '6',
-    name: 'Dr. Priya Shrestha',
-    specialization: 'Pediatric Dentistry',
-    qualification: 'BDS, MDS (Pedo)',
-    experience: 7,
-    about: 'Child-friendly dentist specializing in dental care for kids and adolescents.',
-    languages: ['Nepali', 'English'],
-    available: true,
-  },
-  {
-    id: '7',
-    name: 'Dr. Rajesh Maharjan',
-    specialization: 'Periodontics',
-    qualification: 'BDS, MDS (Perio)',
-    experience: 11,
-    about: 'Gum specialist treating gum diseases and performing dental implants.',
-    languages: ['Nepali', 'Newari', 'English'],
-    available: true,
-  },
-  {
-    id: '8',
-    name: 'Dr. Maya Tamang',
-    specialization: 'Cosmetic Dentistry',
-    qualification: 'BDS, Certified Cosmetic Dentist',
-    experience: 6,
-    about: 'Specializing in teeth whitening, veneers, and smile enhancement procedures.',
-    languages: ['Nepali', 'English'],
-    available: true,
-  },
-];
+interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  qualification: string;
+  experience: number;
+  bio: string;
+  isActive: boolean;
+  email: string;
+  phone: string;
+}
 
 const specializations = [
   'All',
   'General Dentistry',
   'Orthodontics',
-  'Oral Surgery',
+  'Oral & Maxillofacial Surgery',
   'Endodontics',
   'Prosthodontics',
   'Pediatric Dentistry',
   'Periodontics',
-  'Cosmetic Dentistry',
+  'Conservative Dentistry & Endodontics',
+  'Periodontist',
 ];
 
 export default function DoctorsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState('All');
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch doctors from API
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        setLoading(true);
+        const response = await get<PaginatedResponse<Doctor>>('doctors', {
+          params: { 
+            page: 1, 
+            limit: 100, 
+            sortBy: 'name', 
+            sortOrder: 'asc'
+          },
+        });
+        setDoctors(response.data || []);
+      } catch (error) {
+        console.error('Failed to load doctors', error);
+        toast.error('Failed to load doctors');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   const filteredDoctors = doctors.filter((doctor) => {
     const matchesSearch =
@@ -166,7 +125,12 @@ export default function DoctorsPage() {
       {/* Doctors Grid */}
       <section className="section-padding bg-neutral-50">
         <div className="container-custom">
-          {filteredDoctors.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+              <p className="text-neutral-500 text-lg mt-4">Loading doctors...</p>
+            </div>
+          ) : filteredDoctors.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredDoctors.map((doctor, index) => (
                 <motion.div
@@ -181,7 +145,7 @@ export default function DoctorsPage() {
                     <span className="text-6xl font-bold text-primary-300">
                       {doctor.name.split(' ').slice(1).map((n) => n[0]).join('')}
                     </span>
-                    {doctor.available && (
+                    {doctor.isActive && (
                       <span className="absolute top-4 right-4 px-3 py-1 bg-green-500 text-white text-xs rounded-full">
                         Available
                       </span>
@@ -212,7 +176,7 @@ export default function DoctorsPage() {
                     </div>
 
                     <p className="text-neutral-600 text-sm mb-4 line-clamp-2">
-                      {doctor.about}
+                      {doctor.bio}
                     </p>
 
                     <div className="flex gap-2">
@@ -224,7 +188,7 @@ export default function DoctorsPage() {
                         Book
                       </Link>
                       <a
-                        href="tel:+9779841234567"
+                        href={`tel:${doctor.phone}`}
                         className="btn-secondary text-sm py-2"
                       >
                         <FiPhone className="w-4 h-4" />

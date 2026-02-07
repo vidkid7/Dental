@@ -8,12 +8,15 @@ import { TestimonialsSection } from '@/components/home/TestimonialsSection';
 import { CTASection } from '@/components/home/CTASection';
 import { BlogSection } from '@/components/home/BlogSection';
 
+// Note: Metadata is static in Next.js App Router
+// For dynamic metadata, we would need to use generateMetadata function
 export const metadata: Metadata = {
-  title: 'Premier Dental College & Hospital | Excellence in Dental Education & Care',
-  description: 'Leading dental college offering BDS, MDS programs with state-of-the-art facilities. Expert dental care services with experienced specialists. Book appointments online.',
+  title: 'Om Chabahil Dental Hospital | Quality Dental Care in Kathmandu',
+  description:
+    'Om Chabahil Dental Hospital provides quality dental care with modern technology and experienced professionals in Kathmandu, Nepal.',
   openGraph: {
-    title: 'Premier Dental College & Hospital',
-    description: 'Excellence in Dental Education & Healthcare',
+    title: 'Om Chabahil Dental Hospital',
+    description: 'Quality Dental Care in Kathmandu',
     images: ['/og-image.jpg'],
   },
 };

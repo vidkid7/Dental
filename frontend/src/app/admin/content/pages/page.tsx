@@ -162,11 +162,11 @@ export default function PagesPage() {
       const heroSection = sections.find((s) => s.sectionKey === 'hero');
 
       setPageContent({
-        metaTitle: (seoSection?.metadata as any)?.metaTitle || `${page.name} | Om Chabahil Dental`,
+        metaTitle: seoSection?.seo?.title || (seoSection?.metadata as any)?.metaTitle || `${page.name} | Om Chabahil Dental`,
         metaDescription:
-          (seoSection?.metadata as any)?.metaDescription || page.description,
-        heroTitle: heroSection?.title || page.name,
-        heroSubtitle: heroSection?.subtitle || page.description,
+          seoSection?.seo?.description || (seoSection?.metadata as any)?.metaDescription || page.description,
+        heroTitle: (heroSection?.content as any)?.title || heroSection?.title || page.name,
+        heroSubtitle: (heroSection?.content as any)?.subtitle || heroSection?.subtitle || page.description,
       });
     } catch (error) {
       console.error('Failed to load page content', error);
@@ -203,16 +203,18 @@ export default function PagesPage() {
 
       // Save SEO section
       await saveSection(editModal.page, 'seo', {
-        metadata: {
-          metaTitle: pageContent.metaTitle,
-          metaDescription: pageContent.metaDescription,
+        seo: {
+          title: pageContent.metaTitle,
+          description: pageContent.metaDescription,
         },
       });
 
       // Save hero section
       await saveSection(editModal.page, 'hero', {
-        title: pageContent.heroTitle,
-        subtitle: pageContent.heroSubtitle,
+        content: {
+          title: pageContent.heroTitle,
+          subtitle: pageContent.heroSubtitle,
+        },
       });
 
       toast.success('Page content updated successfully');
@@ -351,26 +353,19 @@ export default function PagesPage() {
             </div>
           </div>
 
-          {/* Page Sections */}
+          {/* Page Info */}
           {editModal.page && (
             <div>
-              <h3 className="text-sm font-medium text-neutral-700 mb-3">Page Sections</h3>
+              <h3 className="text-sm font-medium text-neutral-700 mb-3">Page Information</h3>
               <div className="bg-neutral-50 rounded-lg p-4">
                 <p className="text-sm text-neutral-600 mb-2">
-                  This page contains the following sections that can be edited:
+                  <strong>Page:</strong> {editModal.page.name}
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {editModal.page.sections.map((section, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1.5 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-700"
-                    >
-                      {section}
-                    </span>
-                  ))}
-                </div>
+                <p className="text-sm text-neutral-600 mb-2">
+                  <strong>URL:</strong> {editModal.page.slug}
+                </p>
                 <p className="text-xs text-neutral-500 mt-3">
-                  For detailed section editing, use the Content Management page.
+                  Currently editing SEO settings and hero section. For detailed section editing, use the Content Management page.
                 </p>
               </div>
             </div>

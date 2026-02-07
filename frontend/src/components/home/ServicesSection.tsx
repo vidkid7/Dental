@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { FiArrowRight } from 'react-icons/fi';
@@ -9,48 +10,48 @@ import {
   FaChild, 
   FaSyringe, 
   FaXRay,
-  FaSmile
+  FaSmile,
+  FaTeeth,
+  FaTint
 } from 'react-icons/fa';
 import { Card, CardContent } from '@/components/ui/Card';
+import { get } from '@/lib/api';
 
-const services = [
-  {
-    icon: FaTooth,
-    title: 'General Dentistry',
-    description: 'Comprehensive dental care including cleanings, fillings, and preventive treatments.',
-    href: '/services#general',
-  },
-  {
-    icon: FaTeethOpen,
-    title: 'Orthodontics',
-    description: 'Braces, aligners, and teeth straightening solutions for a perfect smile.',
-    href: '/services#orthodontics',
-  },
-  {
-    icon: FaSyringe,
-    title: 'Oral Surgery',
-    description: 'Expert surgical procedures including extractions, implants, and jaw surgery.',
-    href: '/services#surgery',
-  },
-  {
-    icon: FaChild,
-    title: 'Pediatric Dentistry',
-    description: 'Gentle, specialized dental care designed for children of all ages.',
-    href: '/services#pediatric',
-  },
-  {
-    icon: FaSmile,
-    title: 'Cosmetic Dentistry',
-    description: 'Teeth whitening, veneers, and smile makeovers for your dream smile.',
-    href: '/services#cosmetic',
-  },
-  {
-    icon: FaXRay,
-    title: 'Endodontics',
-    description: 'Root canal treatments and other procedures to save damaged teeth.',
-    href: '/services#endodontics',
-  },
-];
+interface Service {
+  id: string;
+  name: string;
+  slug: string;
+  shortDescription: string;
+  isActive: boolean;
+}
+
+// Icon mapping for services
+const iconMap: Record<string, any> = {
+  'xray': FaXRay,
+  'x-ray': FaXRay,
+  'hygiene': FaTooth,
+  'filling': FaTooth,
+  'rct': FaSyringe,
+  'root-canal': FaSyringe,
+  'crown': FaTeeth,
+  'implant': FaTeeth,
+  'denture': FaTeeth,
+  'braces': FaTeethOpen,
+  'orthodontic': FaTeethOpen,
+  'appliance': FaTeethOpen,
+  'surgery': FaSyringe,
+  'oral-surgery': FaSyringe,
+  'perio': FaTint,
+  'pedo': FaChild,
+  'pediatric': FaChild,
+  'cosmetic': FaSmile,
+};
+
+// Get icon based on service slug
+const getServiceIcon = (slug: string) => {
+  const key = Object.keys(iconMap).find(k => slug.includes(k));
+  return key ? iconMap[key] : FaTooth;
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -72,6 +73,32 @@ const itemVariants = {
 };
 
 export function ServicesSection() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch services from API
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        const response = await get<Service[]>('services', {
+          params: { 
+            page: 1, 
+            limit: 6, // Show 6 services on homepage
+            sortBy: 'order', 
+            sortOrder: 'asc'
+          },
+        });
+        setServices(response || []);
+      } catch (error) {
+        console.error('Failed to load services', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
   return (
     <section className="section-padding bg-white">
       <div className="container-custom">
@@ -94,37 +121,47 @@ export function ServicesSection() {
         </motion.div>
 
         {/* Services Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {services.map((service, index) => (
-            <motion.div key={service.title} variants={itemVariants}>
-              <Link href={service.href}>
-                <Card hover className="h-full group">
-                  <CardContent className="p-6">
-                    <div className="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-primary-600 transition-colors">
-                      <service.icon className="w-7 h-7 text-primary-600 group-hover:text-white transition-colors" />
-                    </div>
-                    <h3 className="text-xl font-heading font-semibold text-neutral-900 mb-2">
-                      {service.title}
-                    </h3>
-                    <p className="text-neutral-600 mb-4">
-                      {service.description}
-                    </p>
-                    <span className="inline-flex items-center text-primary-600 font-medium group-hover:gap-2 transition-all">
-                      Learn more
-                      <FiArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            <p className="text-neutral-500 text-lg mt-4">Loading services...</p>
+          </div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {services.map((service, index) => {
+              const ServiceIcon = getServiceIcon(service.slug);
+              return (
+                <motion.div key={service.id} variants={itemVariants}>
+                  <Link href={`/services#${service.slug}`}>
+                    <Card hover className="h-full group">
+                      <CardContent className="p-6">
+                        <div className="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-primary-600 transition-colors">
+                          <ServiceIcon className="w-7 h-7 text-primary-600 group-hover:text-white transition-colors" />
+                        </div>
+                        <h3 className="text-xl font-heading font-semibold text-neutral-900 mb-2">
+                          {service.name}
+                        </h3>
+                        <p className="text-neutral-600 mb-4">
+                          {service.shortDescription}
+                        </p>
+                        <span className="inline-flex items-center text-primary-600 font-medium group-hover:gap-2 transition-all">
+                          Learn more
+                          <FiArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                        </span>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
 
         {/* CTA */}
         <motion.div

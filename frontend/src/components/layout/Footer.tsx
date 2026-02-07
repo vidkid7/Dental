@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FiFacebook, FiInstagram, FiYoutube, FiMapPin, FiPhone, FiMail, FiClock } from 'react-icons/fi';
+import { useSettings } from '@/hooks/useSettings';
 
 const footerLinks = {
   services: [
@@ -35,6 +36,7 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { settings } = useSettings();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -69,15 +71,15 @@ export function Footer() {
             <div className="space-y-3">
               <a href="https://maps.google.com/?q=Om+Chabahil+Dental+Koteshwor" target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 text-neutral-400 hover:text-white transition-colors">
                 <FiMapPin className="w-5 h-5 mt-0.5 flex-shrink-0 text-primary-400" />
-                <span>Chabahil, Koteshwor<br />Kathmandu, Nepal</span>
+                <span dangerouslySetInnerHTML={{ __html: settings.address?.replace(', Kathmandu', ',<br />Kathmandu') || '' }} />
               </a>
-              <a href="tel:+9779841234567" className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
+              <a href={`tel:${settings.phone?.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
                 <FiPhone className="w-5 h-5 flex-shrink-0 text-primary-400" />
-                <span>+977 9841-234567</span>
+                <span>{settings.phone}</span>
               </a>
-              <a href="mailto:info@omchabahildental.com.np" className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
+              <a href={`mailto:${settings.email}`} className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
                 <FiMail className="w-5 h-5 flex-shrink-0 text-primary-400" />
-                <span>info@omchabahildental.com.np</span>
+                <span>{settings.email}</span>
               </a>
               <div className="flex items-start gap-3 text-neutral-400">
                 <FiClock className="w-5 h-5 mt-0.5 flex-shrink-0 text-primary-400" />

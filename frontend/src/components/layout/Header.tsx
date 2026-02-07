@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMenu, FiX, FiPhone, FiMail, FiChevronDown, FiMapPin } from 'react-icons/fi';
 import { cn } from '@/lib/utils';
+import { useSettings } from '@/hooks/useSettings';
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -27,6 +28,7 @@ const navigation = [
 ];
 
 export function Header() {
+  const { settings } = useSettings();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -51,17 +53,17 @@ export function Header() {
       <div className="bg-primary-900 text-white py-2 hidden md:block">
         <div className="container-custom flex justify-between items-center text-sm">
           <div className="flex items-center gap-6">
-            <a href="tel:+9779841234567" className="flex items-center gap-2 hover:text-primary-200 transition-colors">
+            <a href={`tel:${settings.phone?.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-2 hover:text-primary-200 transition-colors">
               <FiPhone className="w-4 h-4" />
-              <span>+977 9841-234567</span>
+              <span>{settings.phone}</span>
             </a>
-            <a href="mailto:info@omchabahildental.com.np" className="flex items-center gap-2 hover:text-primary-200 transition-colors">
+            <a href={`mailto:${settings.email}`} className="flex items-center gap-2 hover:text-primary-200 transition-colors">
               <FiMail className="w-4 h-4" />
-              <span>info@omchabahildental.com.np</span>
+              <span>{settings.email}</span>
             </a>
             <span className="flex items-center gap-2">
               <FiMapPin className="w-4 h-4" />
-              <span>Chabahil, Koteshwor, Kathmandu</span>
+              <span>{settings.address?.replace(', Nepal', '')}</span>
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -96,7 +98,7 @@ export function Header() {
                 <h1 className="font-heading font-bold text-lg text-neutral-900 leading-tight">
                   Om Chabahil Dental
                 </h1>
-                <p className="text-xs text-neutral-500">Koteshwor, Kathmandu</p>
+                <p className="text-xs text-neutral-500">{settings.address?.replace(', Nepal', '')}</p>
               </div>
             </Link>
 

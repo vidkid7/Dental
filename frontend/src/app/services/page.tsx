@@ -1,5 +1,6 @@
-import { Metadata } from 'next';
-// Images replaced with placeholders
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   FaTooth, 
@@ -12,128 +13,70 @@ import {
   FaTint
 } from 'react-icons/fa';
 import { FiArrowRight, FiCheck } from 'react-icons/fi';
+import { get } from '@/lib/api';
+import { toast } from 'react-hot-toast';
 
-export const metadata: Metadata = {
-  title: 'Dental Services | Om Chabahil Dental Hospital',
-  description: 'Comprehensive dental services in Kathmandu including general dentistry, orthodontics, root canal, dental implants, cosmetic dentistry, and more.',
+interface Service {
+  id: string;
+  name: string;
+  slug: string;
+  shortDescription: string;
+  description: string;
+  image: string;
+  isActive: boolean;
+  order: number;
+}
+
+// Icon mapping for services
+const iconMap: Record<string, any> = {
+  'xray': FaXRay,
+  'hygiene': FaTooth,
+  'filling': FaTooth,
+  'rct': FaSyringe,
+  'crown': FaTeeth,
+  'denture': FaTeeth,
+  'braces': FaTeethOpen,
+  'appliance': FaTeethOpen,
+  'surgery': FaSyringe,
+  'perio': FaTint,
+  'pedo': FaChild,
+  'cosmetic': FaSmile,
 };
 
-const services = [
-  {
-    id: 'general',
-    icon: FaTooth,
-    title: 'General Dentistry',
-    description: 'Our general dentistry services cover all aspects of preventive and restorative dental care to maintain your oral health.',
-    features: [
-      'Dental examinations and cleanings',
-      'Cavity fillings and restorations',
-      'Tooth extractions',
-      'Gum disease treatment',
-      'Dental X-rays and diagnostics',
-    ],
-    image: '/images/service-general.jpg',
-  },
-  {
-    id: 'orthodontics',
-    icon: FaTeethOpen,
-    title: 'Orthodontics',
-    description: 'Achieve a perfect smile with our comprehensive orthodontic treatments using the latest techniques and technology.',
-    features: [
-      'Traditional metal braces',
-      'Ceramic braces',
-      'Clear aligners (Invisalign)',
-      'Lingual braces',
-      'Retainers and follow-up care',
-    ],
-    image: '/images/service-orthodontics.jpg',
-  },
-  {
-    id: 'surgery',
-    icon: FaSyringe,
-    title: 'Oral & Maxillofacial Surgery',
-    description: 'Expert surgical solutions for complex dental and facial conditions by our experienced oral surgeons.',
-    features: [
-      'Wisdom tooth extraction',
-      'Dental implant placement',
-      'Jaw surgery (orthognathic)',
-      'Facial trauma treatment',
-      'TMJ disorder treatment',
-    ],
-    image: '/images/service-surgery.jpg',
-  },
-  {
-    id: 'pediatric',
-    icon: FaChild,
-    title: 'Pediatric Dentistry',
-    description: 'Gentle, child-friendly dental care designed to make your little ones feel comfortable and happy.',
-    features: [
-      'First dental visit guidance',
-      'Preventive treatments',
-      'Fluoride application',
-      'Dental sealants',
-      'Behavior management',
-    ],
-    image: '/images/service-pediatric.jpg',
-  },
-  {
-    id: 'cosmetic',
-    icon: FaSmile,
-    title: 'Cosmetic Dentistry',
-    description: 'Transform your smile with our range of cosmetic procedures designed to enhance your appearance.',
-    features: [
-      'Teeth whitening',
-      'Porcelain veneers',
-      'Dental bonding',
-      'Smile makeovers',
-      'Gum contouring',
-    ],
-    image: '/images/service-cosmetic.jpg',
-  },
-  {
-    id: 'endodontics',
-    icon: FaXRay,
-    title: 'Endodontics',
-    description: 'Save your natural teeth with our specialized root canal treatments and endodontic procedures.',
-    features: [
-      'Root canal treatment',
-      'Endodontic retreatment',
-      'Apicoectomy',
-      'Dental trauma management',
-      'Pulp therapy',
-    ],
-    image: '/images/service-endodontics.jpg',
-  },
-  {
-    id: 'prosthodontics',
-    icon: FaTeeth,
-    title: 'Prosthodontics',
-    description: 'Restore function and aesthetics with our comprehensive prosthetic dental solutions.',
-    features: [
-      'Dental crowns and bridges',
-      'Complete dentures',
-      'Partial dentures',
-      'Implant-supported prosthetics',
-      'Full mouth rehabilitation',
-    ],
-    image: '/images/service-prosthodontics.jpg',
-  },
-  {
-    id: 'periodontics',
-    icon: FaTint,
-    title: 'Periodontics',
-    description: 'Specialized care for your gums and supporting structures to maintain a healthy foundation for your teeth.',
-    features: [
-      'Scaling and root planing',
-      'Gum grafting',
-      'Crown lengthening',
-      'Pocket reduction surgery',
-      'Dental implants',
-    ],
-    image: '/images/service-periodontics.jpg',
-  },
-];
+// Get icon based on service slug
+const getServiceIcon = (slug: string) => {
+  const key = Object.keys(iconMap).find(k => slug.includes(k));
+  return key ? iconMap[key] : FaTooth;
+};
 
 export default function ServicesPage() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch services from API
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        const response = await get<Service[]>('services', {
+          params: { 
+            page: 1, 
+            limit: 100, 
+            sortBy: 'order', 
+            sortOrder: 'asc'
+          },
+        });
+        setServices(response || []);
+      } catch (error) {
+        console.error('Failed to load services', error);
+        toast.error('Failed to load services');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
   return (
     <>
       {/* Hero Section */}
@@ -158,48 +101,55 @@ export default function ServicesPage() {
       {/* Services List */}
       <section className="section-padding bg-white">
         <div className="container-custom">
-          <div className="space-y-24">
-            {services.map((service, index) => (
-              <div
-                key={service.id}
-                id={service.id}
-                className={`grid lg:grid-cols-2 gap-12 items-center ${
-                  index % 2 === 1 ? 'lg:flex-row-reverse' : ''
-                }`}
-              >
-                <div className={index % 2 === 1 ? 'lg:order-2' : ''}>
-                  <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-card bg-gradient-to-br from-primary-200 to-accent-200 flex items-center justify-center">
-                    <service.icon className="w-16 h-16 text-primary-400" />
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+              <p className="text-neutral-500 text-lg mt-4">Loading services...</p>
+            </div>
+          ) : services.length > 0 ? (
+            <div className="space-y-24">
+              {services.map((service, index) => {
+                const ServiceIcon = getServiceIcon(service.slug);
+                return (
+                  <div
+                    key={service.id}
+                    id={service.slug}
+                    className={`grid lg:grid-cols-2 gap-12 items-center ${
+                      index % 2 === 1 ? 'lg:flex-row-reverse' : ''
+                    }`}
+                  >
+                    <div className={index % 2 === 1 ? 'lg:order-2' : ''}>
+                      <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-card bg-gradient-to-br from-primary-200 to-accent-200 flex items-center justify-center">
+                        <ServiceIcon className="w-16 h-16 text-primary-400" />
+                      </div>
+                    </div>
+                    <div className={index % 2 === 1 ? 'lg:order-1' : ''}>
+                      <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mb-6">
+                        <ServiceIcon className="w-8 h-8 text-primary-600" />
+                      </div>
+                      <h2 className="text-3xl font-heading font-bold text-neutral-900 mb-4">
+                        {service.name}
+                      </h2>
+                      <p className="text-lg text-neutral-600 mb-6">
+                        {service.description}
+                      </p>
+                      <div className="mb-8">
+                        <p className="text-neutral-700">{service.shortDescription}</p>
+                      </div>
+                      <Link href="/appointments/book" className="btn-primary">
+                        Book an Appointment
+                        <FiArrowRight className="w-5 h-5 ml-2" />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-                <div className={index % 2 === 1 ? 'lg:order-1' : ''}>
-                  <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mb-6">
-                    <service.icon className="w-8 h-8 text-primary-600" />
-                  </div>
-                  <h2 className="text-3xl font-heading font-bold text-neutral-900 mb-4">
-                    {service.title}
-                  </h2>
-                  <p className="text-lg text-neutral-600 mb-6">
-                    {service.description}
-                  </p>
-                  <ul className="space-y-3 mb-8">
-                    {service.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <FiCheck className="w-4 h-4 text-accent-600" />
-                        </div>
-                        <span className="text-neutral-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/appointments/book" className="btn-primary">
-                    Book an Appointment
-                    <FiArrowRight className="w-5 h-5 ml-2" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-neutral-500 text-lg">No services available at the moment.</p>
+            </div>
+          )}
         </div>
       </section>
 
