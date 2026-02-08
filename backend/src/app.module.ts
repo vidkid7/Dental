@@ -39,17 +39,37 @@ import { SettingsModule } from './modules/settings/settings.module';
     // Database (PostgreSQL)
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DATABASE_HOST', 'localhost'),
-        port: configService.get('DATABASE_PORT', 5432),
-        username: configService.get('DATABASE_USER', 'dental_user'),
-        password: configService.get('DATABASE_PASSWORD', 'dental_password'),
-        database: configService.get('DATABASE_NAME', 'dental_db'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') === 'development',
-        logging: configService.get('NODE_ENV') === 'development',
-      }),
+      useFactory: (configService: ConfigService) => {
+        // Check if DATABASE_URL is provided (Railway/production)
+        const databaseUrl = configService.get('DATABASE_URL');
+        
+        if (databaseUrl) {
+          // Parse DATABASE_URL for Railway
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+            synchronize: configService.get('NODE_ENV') === 'development',
+            logging: configService.get('NODE_ENV') === 'development',
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          };
+        }
+        
+        // Use individual env variables for local development
+        return {
+          type: 'postgres',
+          host: configService.get('DATABASE_HOST', 'localhost'),
+          port: configService.get('DATABASE_PORT', 5432),
+          username: configService.get('DATABASE_USER', 'dental_user'),
+          password: configService.get('DATABASE_PASSWORD', 'dental_password'),
+          database: configService.get('DATABASE_NAME', 'dental_db'),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: configService.get('NODE_ENV') === 'development',
+          logging: configService.get('NODE_ENV') === 'development',
+        };
+      },
       inject: [ConfigService],
     }),
 
