@@ -154,6 +154,20 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Powered By Section */}
+      <div className="border-t border-neutral-800 bg-neutral-950">
+        <div className="container-custom py-4">
+          <div className="flex justify-center items-center">
+            <p className="text-sm text-neutral-500">
+              Powered by{' '}
+              <span className="font-semibold text-primary-400 hover:text-primary-300 transition-colors">
+                NepX Creation
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
     </footer>
   );
 }
