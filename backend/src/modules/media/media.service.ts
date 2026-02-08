@@ -11,7 +11,7 @@ import { PaginationDto, PaginatedResponseDto } from '@/common/dto/pagination.dto
 export class MediaService {
   private readonly MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
   private readonly MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
-  private readonly uploadPath = path.join(process.cwd(), '..', 'frontend', 'public');
+  private readonly uploadPath = path.join(process.cwd(), 'uploads');
 
   constructor(
     @InjectRepository(MediaFile)
@@ -29,7 +29,7 @@ export class MediaService {
       fs.mkdirSync(videoPath, { recursive: true });
     }
 
-    console.log('✅ Media upload configured for local storage');
+    console.log('✅ Media upload configured for backend storage');
     console.log(`   Images: ${imagePath}`);
     console.log(`   Videos: ${videoPath}`);
   }
@@ -84,7 +84,7 @@ export class MediaService {
     }
 
     // Create public URL
-    const url = `/${uploadDir}/${filename}`;
+    const url = `/uploads/${uploadDir}/${filename}`;
 
     // Save to database
     const mediaFile = this.mediaRepository.create({
