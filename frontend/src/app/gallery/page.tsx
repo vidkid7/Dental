@@ -233,11 +233,13 @@ export default function GalleryPage() {
               ) : (
                 <div className="aspect-video rounded-xl overflow-hidden bg-black">
                   <video
+                    src={selectedItem.url}
                     className="w-full h-full"
                     controls
                     autoPlay
                   >
                     <source src={selectedItem.url} type="video/mp4" />
+                    Your browser does not support the video tag.
                   </video>
                 </div>
               )}
