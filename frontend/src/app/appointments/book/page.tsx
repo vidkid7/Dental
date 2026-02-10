@@ -352,6 +352,7 @@ export default function BookAppointmentPage() {
                         return (
                           <button
                             key={dateStr}
+                            type="button"
                             onClick={() => {
                               if (!isDisabled) {
                                 setSelectedDate(dateStr);
@@ -409,6 +410,7 @@ export default function BookAppointmentPage() {
                           {availableSlots.map((time) => (
                             <button
                               key={time}
+                              type="button"
                               onClick={() => setSelectedTime(time)}
                               className={`p-3 rounded-lg border-2 text-center transition-all hover:scale-105 ${
                                 selectedTime === time

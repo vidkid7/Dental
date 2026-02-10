@@ -15,6 +15,7 @@ interface Doctor {
   qualification: string;
   experience: number;
   bio: string;
+  photo?: string;
   isActive: boolean;
   email: string;
   phone: string;
@@ -140,11 +141,19 @@ export default function DoctorsPage() {
                   transition={{ delay: index * 0.05 }}
                   className="bg-white rounded-2xl shadow-card overflow-hidden group"
                 >
-                  {/* Doctor Image Placeholder */}
-                  <div className="relative aspect-square bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center">
-                    <span className="text-6xl font-bold text-primary-300">
-                      {doctor.name.split(' ').slice(1).map((n) => n[0]).join('')}
-                    </span>
+                  {/* Doctor Image */}
+                  <div className="relative aspect-square bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center overflow-hidden">
+                    {doctor.photo ? (
+                      <img
+                        src={doctor.photo}
+                        alt={doctor.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-6xl font-bold text-primary-300">
+                        {doctor.name.split(' ').map((n) => n[0]).join('')}
+                      </span>
+                    )}
                     {doctor.isActive && (
                       <span className="absolute top-4 right-4 px-3 py-1 bg-green-500 text-white text-xs rounded-full">
                         Available

@@ -14,6 +14,7 @@ interface Doctor {
   specialization: string;
   qualification: string;
   experience: number;
+  photo?: string;
   isActive: boolean;
   phone: string;
 }
@@ -85,11 +86,19 @@ export function DoctorsSection() {
               >
                 <Card hover className="group overflow-hidden">
                   <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-primary-100 to-accent-100">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-5xl font-bold text-primary-300">
-                        {doctor.name.split(' ').slice(1).map((n) => n[0]).join('')}
-                      </span>
-                    </div>
+                    {doctor.photo ? (
+                      <img
+                        src={doctor.photo}
+                        alt={doctor.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-5xl font-bold text-primary-300">
+                          {doctor.name.split(' ').map((n) => n[0]).join('')}
+                        </span>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     
                     {/* Quick Actions - Show on Hover */}
