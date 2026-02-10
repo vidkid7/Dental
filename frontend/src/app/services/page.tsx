@@ -27,6 +27,24 @@ interface Service {
   order: number;
 }
 
+// Hardcoded service images mapping
+const serviceImages: Record<string, string> = {
+  'general-dentistry': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80',
+  'orthodontics': 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&q=80',
+  'oral-maxillofacial-surgery': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80',
+  'oral-surgery': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80',
+  'pediatric-dentistry': 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=800&q=80',
+  'cosmetic-dentistry': 'https://images.unsplash.com/photo-1609840114035-3c981407e31f?w=800&q=80',
+  'endodontics': 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=800&q=80',
+  'prosthodontics': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80',
+  'periodontics': 'https://images.unsplash.com/photo-1588776814546-daab30f310ce?w=800&q=80',
+};
+
+// Get service image based on slug
+const getServiceImage = (slug: string) => {
+  return serviceImages[slug] || 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80';
+};
+
 // Icon mapping for services
 const iconMap: Record<string, any> = {
   'xray': FaXRay,
@@ -119,8 +137,12 @@ export default function ServicesPage() {
                     }`}
                   >
                     <div className={index % 2 === 1 ? 'lg:order-2' : ''}>
-                      <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-card bg-gradient-to-br from-primary-200 to-accent-200 flex items-center justify-center">
-                        <ServiceIcon className="w-16 h-16 text-primary-400" />
+                      <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-card">
+                        <img 
+                          src={getServiceImage(service.slug)} 
+                          alt={service.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     </div>
                     <div className={index % 2 === 1 ? 'lg:order-1' : ''}>
