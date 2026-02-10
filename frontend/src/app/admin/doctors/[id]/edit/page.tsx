@@ -130,17 +130,11 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     setIsSubmitting(true);
 
     try {
-      let photoUrl: string | undefined | null = form.photo;
+      let photoUrl: string | undefined = form.photo;
 
-      console.log('=== Photo Removal Debug ===');
-      console.log('photoDeleted flag:', photoDeleted);
-      console.log('form.photo:', form.photo);
-      console.log('imagePreview:', imagePreview);
-
-      // If photo was explicitly deleted, set to null
+      // If photo was explicitly deleted, set to empty string
       if (photoDeleted) {
-        photoUrl = null;
-        console.log('Setting photoUrl to null for deletion');
+        photoUrl = '';
       }
 
       // Upload new photo if selected
@@ -181,7 +175,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         }
       }
 
-      const updateData: Partial<DoctorForm> & { photo?: string | null } = {
+      const updateData: Partial<DoctorForm> = {
         name: form.name,
         email: form.email,
         phone: form.phone,
@@ -190,11 +184,8 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         experience: Number(form.experience) || 0,
         consultationFee: form.consultationFee ? Number(form.consultationFee) : undefined,
         departmentId: form.departmentId,
-        photo: photoUrl === null ? null : photoUrl,
+        photo: photoUrl,
       };
-
-      console.log('Update data being sent:', updateData);
-      console.log('Photo value in update:', updateData.photo);
 
       await patch<DoctorForm, typeof updateData>(`doctors/${form.id}`, updateData);
       toast.success('Doctor updated successfully');

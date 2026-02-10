@@ -23,9 +23,9 @@ export class DoctorsService {
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
-    // Convert null to undefined for TypeORM compatibility
+    // Convert empty string to undefined for TypeORM compatibility
     const doctorData = { ...createDoctorDto };
-    if (doctorData.photo === null) {
+    if (doctorData.photo === '') {
       doctorData.photo = undefined;
     }
     const doctor = this.doctorsRepository.create(doctorData);
@@ -76,25 +76,14 @@ export class DoctorsService {
   async update(id: string, updateDoctorDto: UpdateDoctorDto): Promise<Doctor> {
     const doctor = await this.findOne(id);
     
-    console.log('=== Doctor Update Debug ===');
-    console.log('Received DTO:', updateDoctorDto);
-    console.log('Photo value in DTO:', updateDoctorDto.photo);
-    console.log('Photo type:', typeof updateDoctorDto.photo);
-    
-    // Convert null to undefined for TypeORM compatibility
+    // Convert empty string to undefined (null in database)
     const updateData = { ...updateDoctorDto };
-    if (updateData.photo === null) {
-      console.log('Converting photo from null to undefined');
+    if (updateData.photo === '') {
       updateData.photo = undefined;
     }
     
     Object.assign(doctor, updateData);
-    console.log('Doctor photo after assign:', doctor.photo);
-    
-    const saved = await this.doctorsRepository.save(doctor);
-    console.log('Saved doctor photo:', saved.photo);
-    
-    return saved;
+    return this.doctorsRepository.save(doctor);
   }
 
   async remove(id: string): Promise<void> {
