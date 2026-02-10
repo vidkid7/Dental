@@ -308,7 +308,7 @@ export default function BookAppointmentPage() {
                       <button
                         type="button"
                         onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}
-                        disabled={isBefore(addDays(currentWeekStart, -7), startOfDay(new Date()))}
+                        disabled={isBefore(currentWeekStart, startOfWeek(new Date(), { weekStartsOn: 0 })) || currentWeekStart.getTime() === startOfWeek(new Date(), { weekStartsOn: 0 }).getTime()}
                         className="p-2 rounded-lg hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         aria-label="Previous week"
                       >
@@ -320,7 +320,7 @@ export default function BookAppointmentPage() {
                       <button
                         type="button"
                         onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}
-                        disabled={currentWeekStart > addDays(new Date(), 83)}
+                        disabled={currentWeekStart >= addDays(startOfWeek(new Date(), { weekStartsOn: 0 }), 84)}
                         className="p-2 rounded-lg hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         aria-label="Next week"
                       >
