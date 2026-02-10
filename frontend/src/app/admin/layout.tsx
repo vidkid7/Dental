@@ -312,14 +312,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                             <p className="text-sm text-neutral-500">{user?.email}</p>
                           </div>
                           <Link
-                            href="/admin/settings/profile"
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
-                            onClick={() => setShowUserMenu(false)}
-                          >
-                            <FiUser className="w-4 h-4" />
-                            Profile Settings
-                          </Link>
-                          <Link
                             href="/admin/settings/security"
                             className="flex items-center gap-2 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
                             onClick={() => setShowUserMenu(false)}
