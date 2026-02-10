@@ -34,7 +34,7 @@ const serviceImages: Record<string, string> = {
   'oral-maxillofacial-surgery': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80',
   'oral-surgery': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80',
   'pediatric-dentistry': 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=800&q=80',
-  'cosmetic-dentistry': 'https://images.unsplash.com/photo-1609840114035-3c981407e31f?w=800&q=80',
+  'cosmetic-dentistry': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80',
   'endodontics': 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=800&q=80',
   'prosthodontics': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80',
   'periodontics': 'https://images.unsplash.com/photo-1588776814546-daab30f310ce?w=800&q=80',
