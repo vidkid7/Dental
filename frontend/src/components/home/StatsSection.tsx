@@ -3,14 +3,15 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { FaUserGraduate, FaUserMd, FaSmile, FaTrophy } from 'react-icons/fa';
+import { FaTeethOpen } from 'react-icons/fa6';
 
 const stats = [
   {
-    icon: FaUserGraduate,
-    value: 5000,
+    icon: FaTeethOpen,
+    value: 50000,
     suffix: '+',
-    label: 'Graduates',
-    description: 'Successful dental professionals',
+    label: 'Successful Treatments',
+    description: 'Dental procedures completed',
   },
   {
     icon: FaUserMd,
@@ -89,7 +90,7 @@ export function StatsSection() {
             Numbers That Speak for Themselves
           </h2>
           <p className="text-primary-200 max-w-2xl mx-auto">
-            Our track record of success in dental education and patient care
+            Our track record of excellence in dental care and patient satisfaction
           </p>
         </motion.div>
 
