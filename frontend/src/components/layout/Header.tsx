@@ -14,15 +14,7 @@ const navigation = [
   { name: 'About Us', href: '/about' },
   { name: 'Services', href: '/services' },
   { name: 'Our Doctors', href: '/doctors' },
-  {
-    name: 'Patients',
-    href: '/patients',
-    children: [
-      { name: 'Book Appointment', href: '/appointments/book' },
-      { name: 'Patient Guide', href: '/patients' },
-      { name: 'Treatment Gallery', href: '/gallery' },
-    ],
-  },
+  { name: 'Gallery', href: '/gallery' },
   { name: 'Blog', href: '/blog' },
   { name: 'Contact', href: '/contact' },
 ];
