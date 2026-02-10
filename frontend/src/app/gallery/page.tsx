@@ -51,6 +51,9 @@ export default function GalleryPage() {
   }, []);
 
   const filteredItems = galleryItems.filter(item => {
+    // Exclude doctor photos from gallery
+    if (item.folder === 'doctors') return false;
+    
     // Filter by media type only
     if (selectedMediaType === 'All') return true;
     if (selectedMediaType === 'Images') return item.type === 'image';
