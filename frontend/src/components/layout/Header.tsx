@@ -9,12 +9,18 @@ import { FiMenu, FiX, FiPhone, FiMail, FiChevronDown, FiMapPin } from 'react-ico
 import { cn } from '@/lib/utils';
 import { useSettings } from '@/hooks/useSettings';
 
-const navigation = [
+interface NavigationItem {
+  name: string;
+  href: string;
+  children?: { name: string; href: string }[];
+}
+
+const navigation: NavigationItem[] = [
   { name: 'Home', href: '/' },
   { name: 'About Us', href: '/about' },
   { name: 'Services', href: '/services' },
   { name: 'Our Doctors', href: '/doctors' },
-  { name: 'Gallery', href: '/gallery' },
+  { name: 'Treatment Gallery', href: '/gallery' },
   { name: 'Blog', href: '/blog' },
   { name: 'Contact', href: '/contact' },
 ];
