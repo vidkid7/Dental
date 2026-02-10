@@ -18,7 +18,6 @@ const footerLinks = {
     { name: 'About Us', href: '/about' },
     { name: 'Our Doctors', href: '/doctors' },
     { name: 'Book Appointment', href: '/appointments/book' },
-    { name: 'Patient Guide', href: '/patients' },
     { name: 'Treatment Gallery', href: '/gallery' },
     { name: 'Blog', href: '/blog' },
     { name: 'Contact Us', href: '/contact' },
