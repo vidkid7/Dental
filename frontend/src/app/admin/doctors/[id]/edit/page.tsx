@@ -142,22 +142,27 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
           const token = localStorage.getItem('accessToken');
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
           
+          console.log('Uploading to:', `${apiUrl}/api/v1/media/upload`);
+          console.log('File:', photoFile.name, photoFile.type, photoFile.size);
+          
           const uploadResponse = await axios.post(
             `${apiUrl}/api/v1/media/upload`,
             formData,
             {
               headers: {
-                'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${token}`,
               },
             }
           );
 
+          console.log('Upload response:', uploadResponse.data);
           photoUrl = uploadResponse.data.url;
           toast.success('Photo uploaded successfully');
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to upload photo', error);
-          toast.error('Failed to upload photo, but continuing...');
+          console.error('Error response:', error.response?.data);
+          console.error('Error status:', error.response?.status);
+          toast.error(error.response?.data?.message || 'Failed to upload photo, but continuing...');
         } finally {
           setIsUploadingPhoto(false);
         }
