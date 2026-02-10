@@ -73,14 +73,32 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
           get<DepartmentOption[]>('departments'),
           get<DoctorAvailability[]>(`doctors/${params.id}/availability`).catch(() => []),
         ]);
+        
+        console.log('=== LOADING DOCTOR DATA ===');
+        console.log('Doctor from API:', doctor);
+        console.log('Doctor photo value:', doctor.photo);
+        console.log('Doctor photo type:', typeof doctor.photo);
+        console.log('Is photo null?', doctor.photo === null);
+        console.log('Is photo undefined?', doctor.photo === undefined);
+        console.log('Is photo empty string?', doctor.photo === '');
+        
         setForm(doctor);
         setDepartments(deptList);
         setAvailabilities(Array.isArray(avail) ? avail : []);
         
-        // Set existing photo as preview
+        // Set existing photo as preview, or clear it if null
         if (doctor.photo) {
+          console.log('Setting imagePreview to:', doctor.photo);
           setImagePreview(doctor.photo);
+        } else {
+          console.log('Clearing imagePreview (doctor.photo is falsy)');
+          setImagePreview(null);
         }
+        
+        // Reset deletion flag when loading fresh data
+        setPhotoDeleted(false);
+        
+        console.log('=== END LOADING ===');
       } catch (error) {
         console.error('Failed to load doctor data', error);
         toast.error(getErrorMessage(error) || 'Failed to load doctor data');
@@ -130,14 +148,15 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     setIsSubmitting(true);
 
     try {
-      let photoUrl: string | undefined = form.photo;
+      let photoUrl: string | null | undefined = form.photo || undefined;
 
-      // If photo was explicitly deleted, set to empty string
+      // If photo was explicitly deleted, set to empty string (backend expects this)
       if (photoDeleted) {
         photoUrl = '';
+        console.log('Photo marked for deletion - will send empty string');
       }
 
-      // Upload new photo if selected
+      // Upload new photo if selected (this overrides deletion)
       if (photoFile) {
         setIsUploadingPhoto(true);
         try {
@@ -149,8 +168,6 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
           
           console.log('Uploading to:', `${apiUrl}/api/v1/media/upload`);
-          console.log('Token exists:', !!token);
-          console.log('File:', photoFile.name, photoFile.type, photoFile.size);
           
           const uploadResponse = await axios.post(
             `${apiUrl}/api/v1/media/upload`,
@@ -167,15 +184,13 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
           toast.success('Photo uploaded successfully');
         } catch (error: any) {
           console.error('Failed to upload photo', error);
-          console.error('Error response:', error.response?.data);
-          console.error('Error status:', error.response?.status);
           toast.error(error.response?.data?.message || 'Failed to upload photo, but continuing...');
         } finally {
           setIsUploadingPhoto(false);
         }
       }
 
-      const updateData: Partial<DoctorForm> = {
+      const updateData: any = {
         name: form.name,
         email: form.email,
         phone: form.phone,
@@ -184,11 +199,23 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         experience: Number(form.experience) || 0,
         consultationFee: form.consultationFee ? Number(form.consultationFee) : undefined,
         departmentId: form.departmentId,
-        photo: photoUrl,
       };
 
-      await patch<DoctorForm, typeof updateData>(`doctors/${form.id}`, updateData);
+      // Always include photo field, even if empty string
+      updateData.photo = photoUrl === null ? '' : (photoUrl || '');
+
+      console.log('Updating doctor with data:', JSON.stringify(updateData, null, 2));
+      console.log('Photo value being sent:', updateData.photo);
+      console.log('Photo value type:', typeof updateData.photo);
+
+      const response = await patch<DoctorForm, typeof updateData>(`doctors/${form.id}`, updateData);
+      console.log('Update response:', response);
+      
       toast.success('Doctor updated successfully');
+      
+      // Reset the photoDeleted flag after successful save
+      setPhotoDeleted(false);
+      
       router.push('/admin/doctors');
     } catch (error) {
       console.error('Failed to update doctor', error);
@@ -268,7 +295,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
       setPhotoFile(null);
       setPhotoDeleted(true);
       if (form) {
-        setForm({ ...form, photo: undefined });
+        setForm({ ...form, photo: null });
       }
       toast.success('Photo will be removed when you save changes');
     }

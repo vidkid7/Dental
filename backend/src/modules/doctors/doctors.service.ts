@@ -23,12 +23,7 @@ export class DoctorsService {
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
-    // Convert empty string to undefined for TypeORM compatibility
-    const doctorData = { ...createDoctorDto };
-    if (doctorData.photo === '') {
-      doctorData.photo = undefined;
-    }
-    const doctor = this.doctorsRepository.create(doctorData);
+    const doctor = this.doctorsRepository.create(createDoctorDto);
     return this.doctorsRepository.save(doctor);
   }
 
@@ -76,13 +71,18 @@ export class DoctorsService {
   async update(id: string, updateDoctorDto: UpdateDoctorDto): Promise<Doctor> {
     const doctor = await this.findOne(id);
     
-    // Convert empty string to undefined (null in database)
-    const updateData = { ...updateDoctorDto };
-    if (updateData.photo === '') {
-      updateData.photo = undefined;
+    // Handle photo deletion: empty string means delete the photo
+    if (updateDoctorDto.photo === '') {
+      // Directly set doctor.photo to null for database (cast to any to bypass TS)
+      (doctor as any).photo = null;
+      // Create update data without photo field
+      const { photo, ...restData } = updateDoctorDto;
+      Object.assign(doctor, restData);
+    } else {
+      // Normal update
+      Object.assign(doctor, updateDoctorDto);
     }
     
-    Object.assign(doctor, updateData);
     return this.doctorsRepository.save(doctor);
   }
 
