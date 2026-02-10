@@ -37,7 +37,7 @@ export class MediaController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Post('upload')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF, UserRole.DOCTOR)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload a file' })
   @ApiConsumes('multipart/form-data')
@@ -60,7 +60,7 @@ export class MediaController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Get()
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF, UserRole.DOCTOR)
   @ApiOperation({ summary: 'Get all media files' })
   @ApiQuery({ name: 'type', required: false, enum: MediaType })
   @ApiQuery({ name: 'folder', required: false })
@@ -75,7 +75,7 @@ export class MediaController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Get('folders')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF, UserRole.DOCTOR)
   @ApiOperation({ summary: 'Get all folders' })
   getFolders() {
     return this.mediaService.getFolders();
@@ -84,7 +84,7 @@ export class MediaController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Get(':id')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF, UserRole.DOCTOR)
   @ApiOperation({ summary: 'Get a media file by ID' })
   findOne(@Param('id') id: string) {
     return this.mediaService.findOne(id);
@@ -93,7 +93,7 @@ export class MediaController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @Patch(':id')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF, UserRole.DOCTOR)
   @ApiOperation({ summary: 'Update media file metadata' })
   update(
     @Param('id') id: string,
