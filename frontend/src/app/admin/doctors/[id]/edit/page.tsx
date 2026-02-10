@@ -253,6 +253,17 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     setPhotoFile(null);
   };
 
+  const handleDeletePhoto = () => {
+    if (window.confirm('Are you sure you want to remove this photo?')) {
+      setImagePreview(null);
+      setPhotoFile(null);
+      if (form) {
+        setForm({ ...form, photo: undefined });
+      }
+      toast.success('Photo will be removed when you save changes');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
@@ -294,6 +305,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
                       type="button"
                       onClick={handleRemoveImage}
                       className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                      title="Cancel new photo"
                     >
                       <FiX className="w-3 h-3" />
                     </button>
@@ -306,16 +318,28 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
               )}
             </div>
             <div className="flex-1">
-              <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
-                <FiUpload className="w-4 h-4" />
-                {imagePreview ? 'Change Photo' : 'Upload Photo'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </label>
+              <div className="flex items-center gap-3">
+                <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
+                  <FiUpload className="w-4 h-4" />
+                  {imagePreview ? 'Change Photo' : 'Upload Photo'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                </label>
+                {imagePreview && (
+                  <button
+                    type="button"
+                    onClick={handleDeletePhoto}
+                    className="btn-ghost text-red-600 hover:text-red-700 hover:bg-red-50 inline-flex items-center gap-2"
+                  >
+                    <FiTrash2 className="w-4 h-4" />
+                    Remove Photo
+                  </button>
+                )}
+              </div>
               <p className="text-sm text-neutral-500 mt-2">
                 JPG, PNG. Max 5MB. Photo will be uploaded to Cloudinary.
               </p>
