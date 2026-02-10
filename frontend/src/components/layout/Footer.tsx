@@ -88,6 +88,23 @@ export function Footer() {
                 </div>
               </div>
             </div>
+
+            {/* Koteshwor Branch */}
+            <div className="mt-6 pt-6 border-t border-neutral-800">
+              <h3 className="font-heading font-semibold text-base mb-3 text-primary-400">
+                Koteshwor Branch
+              </h3>
+              <div className="space-y-2">
+                <a href="mailto:ocdkoteshwor@gmail.com" className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
+                  <FiMail className="w-4 h-4 flex-shrink-0 text-primary-400" />
+                  <span className="text-sm">ocdkoteshwor@gmail.com</span>
+                </a>
+                <a href="tel:015910317" className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
+                  <FiPhone className="w-4 h-4 flex-shrink-0 text-primary-400" />
+                  <span className="text-sm">015910317, 015910318</span>
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Services */}
