@@ -100,8 +100,8 @@ export class NotificationsService {
             <p>If you need to cancel or reschedule, please contact us at least 24 hours in advance.</p>
           </div>
           <div class="footer">
-            <p>Premier Dental College & Hospital</p>
-            <p>123 Dental Avenue, Medical District | +1 (234) 567-890</p>
+            <p>Om Chabahil Dental Hospital</p>
+            <p>Chabahil, Koteshwor, Kathmandu, Nepal | 0145-92100</p>
           </div>
         </div>
       </body>

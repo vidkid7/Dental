@@ -70,14 +70,14 @@ export function ChatbotWidget() {
       // Simulated response
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const simulatedResponses: Record<string, string> = {
-        'How do I book an appointment?': 'You can book an appointment through our website by clicking on "Book Appointment" in the navigation menu, or call us at +1 (234) 567-890. Our online booking system allows you to choose your preferred doctor, date, and time slot.',
+        'How do I book an appointment?': 'You can book an appointment through our website by clicking on "Book Appointment" in the navigation menu, or call us at 0145-92100. Our online booking system allows you to choose your preferred doctor, date, and time slot.',
         'BDS admission requirements': 'For BDS admission, you need: 10+2 with Physics, Chemistry, Biology with minimum 50% marks, a valid entrance exam score, and be between 17-25 years of age. Visit our Admissions page for detailed information and to apply online.',
         'What are your working hours?': 'Our clinic hours are: Monday to Friday 8:00 AM - 6:00 PM, Saturday 9:00 AM - 4:00 PM. Emergency services are available on Sundays. Feel free to call us for urgent cases.',
         'Services offered': 'We offer comprehensive dental services including General Dentistry, Orthodontics, Oral Surgery, Pediatric Dentistry, Cosmetic Dentistry, Endodontics, Prosthodontics, and Periodontics. Would you like to know more about any specific service?',
       };
       
       const responseText = simulatedResponses[text] || 
-        "Thank you for your question. For specific inquiries, please contact us at info@premierdentalcollege.edu or call +1 (234) 567-890. Is there anything else I can help you with?";
+        "Thank you for your question. For specific inquiries, please contact us at Omchabahildental2075@gmail.com or call 0145-92100. Is there anything else I can help you with?";
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -92,7 +92,7 @@ export function ChatbotWidget() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "I'm experiencing technical difficulties. Please try again or contact us directly at +1 (234) 567-890.",
+        content: "I'm experiencing technical difficulties. Please try again or contact us directly at 0145-92100.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);

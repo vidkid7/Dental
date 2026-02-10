@@ -35,9 +35,9 @@ Guidelines:
 - Don't provide medical diagnosis or treatment advice - always recommend consulting a dentist
 
 Contact Information:
-- Phone: +1 (234) 567-890
-- Email: info@premierdentalcollege.edu
-- Address: 123 Dental Avenue, Medical District
+- Phone: 0145-92100
+- Email: Omchabahildental2075@gmail.com
+- Address: Chabahil, Koteshwor, Kathmandu, Nepal
 
 Working Hours:
 - Monday to Friday: 8:00 AM - 6:00 PM
@@ -66,7 +66,7 @@ Working Hours:
       return response.choices[0]?.message?.content || "I'm sorry, I couldn't process your request. Please try again.";
     } catch (error) {
       console.error('Chatbot error:', error);
-      return "I'm experiencing technical difficulties. Please try again later or contact us directly at +1 (234) 567-890.";
+      return "I'm experiencing technical difficulties. Please try again later or contact us directly at 0145-92100.";
     }
   }
 
@@ -74,7 +74,7 @@ Working Hours:
     return [
       {
         question: 'How do I book an appointment?',
-        answer: 'You can book an appointment online through our website by clicking on "Book Appointment", or call us at +1 (234) 567-890.',
+        answer: 'You can book an appointment online through our website by clicking on "Book Appointment", or call us at 0145-92100.',
       },
       {
         question: 'What are the BDS admission requirements?',

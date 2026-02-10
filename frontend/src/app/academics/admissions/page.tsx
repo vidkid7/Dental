@@ -257,7 +257,7 @@ export default function AdmissionsPage() {
                         />
                         <Input
                           label="Phone Number"
-                          placeholder="+1 (234) 567-890"
+                          placeholder="0145-92100"
                           error={errors.phone?.message}
                           {...register('phone')}
                           required

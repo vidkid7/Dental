@@ -12,7 +12,7 @@ INSERT INTO users (id, email, password, name, role, is_active, created_at, updat
 VALUES (
   uuid_generate_v4(),
   'superadmin@omchabahildental.com.np',
-  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+  '$2b$10$ikUlxQ8UQd4aDIU2jRqoBOGIhgEgc7INYc4jjPMOqSQKP63PxqgNe',
   'Super Administrator',
   'super_admin',
   true,

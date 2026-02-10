@@ -21,6 +21,7 @@ const fs = require("fs");
 const path = require("path");
 const media_entity_1 = require("./entities/media.entity");
 const pagination_dto_1 = require("../../common/dto/pagination.dto");
+const cloudinary_1 = require("cloudinary");
 let MediaService = class MediaService {
     constructor(mediaRepository, configService) {
         this.mediaRepository = mediaRepository;
@@ -28,17 +29,31 @@ let MediaService = class MediaService {
         this.MAX_IMAGE_SIZE = 5 * 1024 * 1024;
         this.MAX_VIDEO_SIZE = 100 * 1024 * 1024;
         this.uploadPath = path.join(process.cwd(), '..', 'frontend', 'public');
-        const imagePath = path.join(this.uploadPath, 'images');
-        const videoPath = path.join(this.uploadPath, 'video');
-        if (!fs.existsSync(imagePath)) {
-            fs.mkdirSync(imagePath, { recursive: true });
+        const cloudName = this.configService.get('CLOUDINARY_CLOUD_NAME');
+        const apiKey = this.configService.get('CLOUDINARY_API_KEY');
+        const apiSecret = this.configService.get('CLOUDINARY_API_SECRET');
+        this.useCloudinary = !!(cloudName && apiKey && apiSecret);
+        if (this.useCloudinary) {
+            cloudinary_1.v2.config({
+                cloud_name: cloudName,
+                api_key: apiKey,
+                api_secret: apiSecret,
+            });
+            console.log('✅ Media service configured with Cloudinary (Cloud Storage)');
         }
-        if (!fs.existsSync(videoPath)) {
-            fs.mkdirSync(videoPath, { recursive: true });
+        else {
+            const imagePath = path.join(this.uploadPath, 'images');
+            const videoPath = path.join(this.uploadPath, 'video');
+            if (!fs.existsSync(imagePath)) {
+                fs.mkdirSync(imagePath, { recursive: true });
+            }
+            if (!fs.existsSync(videoPath)) {
+                fs.mkdirSync(videoPath, { recursive: true });
+            }
+            console.log('✅ Media service configured with Local Storage');
+            console.log(`   Images: ${imagePath}`);
+            console.log(`   Videos: ${videoPath}`);
         }
-        console.log('✅ Media upload configured for local storage');
-        console.log(`   Images: ${imagePath}`);
-        console.log(`   Videos: ${videoPath}`);
     }
     async uploadFile(file, folder = 'general') {
         if (!file) {
@@ -64,22 +79,51 @@ let MediaService = class MediaService {
             mediaType = media_entity_1.MediaType.DOCUMENT;
             uploadDir = 'images';
         }
-        const timestamp = Date.now();
-        const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filename = `${timestamp}-${sanitizedName}`;
-        const filePath = path.join(this.uploadPath, uploadDir, filename);
-        try {
-            fs.writeFileSync(filePath, file.buffer);
+        let url;
+        let publicId;
+        if (this.useCloudinary) {
+            try {
+                const uploadResult = await new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary_1.v2.uploader.upload_stream({
+                        folder: `dental-hospital/${uploadDir}/${folder}`,
+                        resource_type: mediaType === media_entity_1.MediaType.VIDEO ? 'video' : 'image',
+                        public_id: `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`,
+                    }, (error, result) => {
+                        if (error)
+                            reject(error);
+                        else
+                            resolve(result);
+                    });
+                    uploadStream.end(file.buffer);
+                });
+                url = uploadResult.secure_url;
+                publicId = uploadResult.public_id;
+                console.log(`✅ Uploaded ${mediaType} to Cloudinary: ${publicId}`);
+            }
+            catch (error) {
+                console.error('Cloudinary upload failed:', error);
+                throw new common_1.BadRequestException('Failed to upload file to cloud storage');
+            }
         }
-        catch (error) {
-            console.error('Failed to save file:', error);
-            throw new common_1.BadRequestException('Failed to save file to disk');
+        else {
+            const timestamp = Date.now();
+            const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const filename = `${timestamp}-${sanitizedName}`;
+            const filePath = path.join(this.uploadPath, uploadDir, filename);
+            try {
+                fs.writeFileSync(filePath, file.buffer);
+            }
+            catch (error) {
+                console.error('Failed to save file:', error);
+                throw new common_1.BadRequestException('Failed to save file to disk');
+            }
+            url = `/${uploadDir}/${filename}`;
+            publicId = filename;
         }
-        const url = `/${uploadDir}/${filename}`;
         const mediaFile = this.mediaRepository.create({
             name: file.originalname,
             url,
-            publicId: filename,
+            publicId,
             type: mediaType,
             mimeType: file.mimetype,
             size: file.size,
@@ -117,14 +161,27 @@ let MediaService = class MediaService {
     }
     async remove(id) {
         const file = await this.findOne(id);
-        try {
-            const filePath = path.join(this.uploadPath, file.url);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
+        if (this.useCloudinary) {
+            try {
+                await cloudinary_1.v2.uploader.destroy(file.publicId, {
+                    resource_type: file.type === media_entity_1.MediaType.VIDEO ? 'video' : 'image',
+                });
+                console.log(`✅ Deleted from Cloudinary: ${file.publicId}`);
+            }
+            catch (error) {
+                console.error('Failed to delete file from Cloudinary:', error);
             }
         }
-        catch (error) {
-            console.error('Failed to delete file from filesystem:', error);
+        else {
+            try {
+                const filePath = path.join(this.uploadPath, file.url);
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
+            }
+            catch (error) {
+                console.error('Failed to delete file from filesystem:', error);
+            }
         }
         await this.mediaRepository.remove(file);
     }

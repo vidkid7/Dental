@@ -8,6 +8,7 @@ export declare class MediaService {
     private readonly MAX_IMAGE_SIZE;
     private readonly MAX_VIDEO_SIZE;
     private readonly uploadPath;
+    private readonly useCloudinary;
     constructor(mediaRepository: Repository<MediaFile>, configService: ConfigService);
     uploadFile(file: Express.Multer.File, folder?: string): Promise<MediaFile>;
     findAll(paginationDto: PaginationDto & {

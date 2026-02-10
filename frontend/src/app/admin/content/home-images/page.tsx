@@ -28,6 +28,13 @@ export default function HomeImagesPage() {
     section: 'home-hero',
   });
 
+  // Home page hero section images (up to 3)
+  const [heroImages, setHeroImages] = useState<HomeImage[]>([
+    { id: 'home-hero-1', url: '/images/team.jpg', alt: 'Om Chabahil Dental Team', section: 'home-hero' },
+    { id: 'home-hero-2', url: '/images/clinic-1.jpg', alt: 'Om Chabahil Dental Clinic', section: 'home-hero' },
+    { id: 'home-hero-3', url: '/images/clinic-2.jpg', alt: 'Om Chabahil Dental Facility', section: 'home-hero' },
+  ]);
+
   // Home page about section images (4 clinic images)
   const [aboutImages, setAboutImages] = useState<HomeImage[]>([
     { id: 'home-about-1', url: '/images/clinic-1.jpg', alt: 'Dental Clinic', section: 'home-about' },
@@ -45,6 +52,29 @@ export default function HomeImagesPage() {
     try {
       // Load home page hero section
       const heroData: any = await get('content/page/home/hero');
+      if (heroData?.content?.images && Array.isArray(heroData.content.images)) {
+        const images = heroData.content.images.slice(0, 3); // Max 3 images
+        setHeroImages(
+          images.map((url: string, index: number) => ({
+            id: `home-hero-${index + 1}`,
+            url,
+            alt: `Om Chabahil Dental Team ${index + 1}`,
+            section: 'home-hero',
+          }))
+        );
+      } else if (heroData?.content?.imagePath) {
+        // Backward compatibility with single image
+        setHeroImages([
+          {
+            id: 'home-hero-1',
+            url: heroData.content.imagePath,
+            alt: 'Om Chabahil Dental Team',
+            section: 'home-hero',
+          },
+        ]);
+      }
+
+      // Also update the legacy single hero image for backward compatibility
       if (heroData?.content?.imagePath) {
         setHeroImage({
           ...heroImage,
@@ -127,16 +157,25 @@ export default function HomeImagesPage() {
 
       // Update state immediately
       if (section === 'home-hero') {
+        const index = heroImages.findIndex((img) => img.id === imageId);
+        if (index !== -1) {
+          const newImages = [...heroImages];
+          newImages[index] = { ...newImages[index], url: imageUrl };
+          setHeroImages(newImages);
+
+          // Get current content and update with new images array
+          const heroData: any = await get('content/page/home/hero');
+          await put('content/page/home/hero', {
+            content: {
+              ...heroData?.content,
+              images: newImages.map((img) => img.url),
+              imagePath: newImages[0].url, // Keep backward compatibility
+            },
+          });
+        }
+
+        // Also update legacy single hero image
         setHeroImage({ ...heroImage, url: imageUrl });
-        
-        // Get current content and update with new image
-        const heroData: any = await get('content/page/home/hero');
-        await put('content/page/home/hero', {
-          content: {
-            ...heroData?.content,
-            imagePath: imageUrl,
-          },
-        });
       } else if (section === 'home-about') {
         const index = aboutImages.findIndex(img => img.id === imageId);
         if (index !== -1) {
@@ -167,12 +206,13 @@ export default function HomeImagesPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Save hero section
+      // Save hero section with multiple images
       const heroData: any = await get('content/page/home/hero');
       await put('content/page/home/hero', {
         content: {
           ...heroData?.content,
-          imagePath: heroImage.url,
+          images: heroImages.map((img) => img.url),
+          imagePath: heroImages[0]?.url || heroImage.url, // Keep backward compatibility
         },
       });
 
@@ -296,22 +336,69 @@ export default function HomeImagesPage() {
         </div>
       </div>
 
-      {/* Hero Section Image */}
+      {/* Hero Section Images */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <h2 className="text-lg font-heading font-semibold text-neutral-900 mb-4 flex items-center gap-2">
-          <FiImage className="w-5 h-5 text-primary-600" />
-          Hero Section
-        </h2>
-        <ImageUploadCard
-          image={heroImage}
-          title="Main Hero Image"
-          description="This image appears in the hero section at the top of the home page"
-          onUpload={(file) => handleImageUpload(file, heroImage.id, 'home-hero')}
-        />
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-heading font-semibold text-neutral-900 flex items-center gap-2">
+            <FiImage className="w-5 h-5 text-primary-600" />
+            Hero Section Slider (Up to 3 Images)
+          </h2>
+          {heroImages.length < 3 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setHeroImages([
+                  ...heroImages,
+                  {
+                    id: `home-hero-${heroImages.length + 1}`,
+                    url: '/images/team.jpg',
+                    alt: `Om Chabahil Dental Team ${heroImages.length + 1}`,
+                    section: 'home-hero',
+                  },
+                ]);
+              }}
+            >
+              <FiImage className="w-4 h-4 mr-2" />
+              Add Image Slot
+            </Button>
+          )}
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {heroImages.map((image, index) => (
+            <div key={image.id} className="relative">
+              <ImageUploadCard
+                image={image}
+                title={`Hero Image ${index + 1}`}
+                description={`Slide ${index + 1} in the hero section slider`}
+                onUpload={(file) => handleImageUpload(file, image.id, 'home-hero')}
+              />
+              {heroImages.length > 1 && (
+                <button
+                  onClick={() => {
+                    const newImages = heroImages.filter((_, i) => i !== index);
+                    setHeroImages(newImages);
+                  }}
+                  className="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                  title="Remove this image slot"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-neutral-600 mt-4">
+          {heroImages.length === 1
+            ? 'Add more images to create a slider effect. Images will auto-rotate every 5 seconds.'
+            : `${heroImages.length} images will rotate automatically in the hero section.`}
+        </p>
       </motion.div>
 
       {/* About Section Images */}

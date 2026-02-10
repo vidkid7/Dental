@@ -44,17 +44,32 @@ exports.AppModule = AppModule = __decorate([
             }),
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
-                useFactory: (configService) => ({
-                    type: 'postgres',
-                    host: configService.get('DATABASE_HOST', 'localhost'),
-                    port: configService.get('DATABASE_PORT', 5432),
-                    username: configService.get('DATABASE_USER', 'dental_user'),
-                    password: configService.get('DATABASE_PASSWORD', 'dental_password'),
-                    database: configService.get('DATABASE_NAME', 'dental_db'),
-                    entities: [__dirname + '/**/*.entity{.ts,.js}'],
-                    synchronize: configService.get('NODE_ENV') === 'development',
-                    logging: configService.get('NODE_ENV') === 'development',
-                }),
+                useFactory: (configService) => {
+                    const databaseUrl = configService.get('DATABASE_URL');
+                    if (databaseUrl) {
+                        return {
+                            type: 'postgres',
+                            url: databaseUrl,
+                            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+                            synchronize: configService.get('NODE_ENV') === 'development',
+                            logging: configService.get('NODE_ENV') === 'development',
+                            ssl: {
+                                rejectUnauthorized: false,
+                            },
+                        };
+                    }
+                    return {
+                        type: 'postgres',
+                        host: configService.get('DATABASE_HOST', 'localhost'),
+                        port: configService.get('DATABASE_PORT', 5432),
+                        username: configService.get('DATABASE_USER', 'dental_user'),
+                        password: configService.get('DATABASE_PASSWORD', 'dental_password'),
+                        database: configService.get('DATABASE_NAME', 'dental_db'),
+                        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+                        synchronize: configService.get('NODE_ENV') === 'development',
+                        logging: configService.get('NODE_ENV') === 'development',
+                    };
+                },
                 inject: [config_1.ConfigService],
             }),
             throttler_1.ThrottlerModule.forRootAsync({

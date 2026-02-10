@@ -62,7 +62,14 @@ let DoctorsService = class DoctorsService {
     }
     async update(id, updateDoctorDto) {
         const doctor = await this.findOne(id);
-        Object.assign(doctor, updateDoctorDto);
+        if (updateDoctorDto.photo === '') {
+            doctor.photo = null;
+            const { photo, ...restData } = updateDoctorDto;
+            Object.assign(doctor, restData);
+        }
+        else {
+            Object.assign(doctor, updateDoctorDto);
+        }
         return this.doctorsRepository.save(doctor);
     }
     async remove(id) {

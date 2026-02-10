@@ -1,214 +1,336 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiArrowRight, FiPlay, FiCalendar, FiPhone } from 'react-icons/fi';
+import { FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { get } from '@/lib/api';
 
 interface HeroContent {
   badgeText?: string;
   title?: string;
-  highlightText?: string;
   subtitle?: string;
-  primaryCtaText?: string;
-  secondaryCtaText?: string;
-  stats?: {
-    yearsExperience?: string;
-    expertDentists?: string;
-    happyPatients?: string;
-  };
+  ctaText?: string;
+  imagePath?: string;
+  images?: string[]; // Array of up to 3 image paths
 }
+
+interface HeroApiResponse {
+  content: HeroContent;
+}
+
+// Animation variants for container with staggered children
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.15,
+      duration: 0.5,
+    },
+  },
+};
+
+// Animation variants for individual content items
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.45,
+      ease: 'easeOut',
+    },
+  },
+};
+
+// Animation variants for image transitions
+const imageVariants = {
+  enter: {
+    opacity: 0,
+  },
+  center: {
+    opacity: 1,
+    transition: {
+      duration: 1,
+      ease: 'easeInOut',
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      duration: 0.5,
+      ease: 'easeInOut',
+    },
+  },
+};
 
 export function HeroSection() {
   const [content, setContent] = useState<HeroContent>({
     badgeText: 'Open 7 Days a Week - Quality Dental Care',
-    title: 'Your Smile,',
-    highlightText: 'Our Priority',
+    title: 'Your Trusted Healthcare Partner',
     subtitle: 'Om Chabahil Dental Hospital - Providing quality dental care with modern technology and experienced professionals in Kathmandu, Nepal.',
-    primaryCtaText: 'Book Appointment',
-    secondaryCtaText: 'Call Now',
-    stats: {
-      yearsExperience: '10+',
-      expertDentists: '15+',
-      happyPatients: '5000+',
-    },
+    ctaText: 'Book Appointment',
+    imagePath: '/images/team.jpg',
+    images: [
+      '/images/team.jpg',
+      '/images/clinic-1.jpg',
+      '/images/clinic-2.jpg',
+    ], // Default with 3 images to show slider
   });
-  const [heroImage, setHeroImage] = useState('/images/team.jpg');
-  const [loading, setLoading] = useState(true);
+  const [isContentReady, setIsContentReady] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Get the array of images (up to 3)
+  const heroImages = content.images && content.images.length > 0 
+    ? content.images.slice(0, 3) 
+    : [content.imagePath || '/images/team.jpg'];
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Hero Images:', heroImages);
+    console.log('Hero Images Length:', heroImages.length);
+    console.log('Current Image Index:', currentImageIndex);
+  }, [heroImages, currentImageIndex]);
+
+  // Auto-advance slider every 5 seconds
+  useEffect(() => {
+    if (heroImages.length <= 1) return; // Don't auto-advance if only one image
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [heroImages.length, heroImages]);
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await get<any>('content/page/home/hero');
+        const response = await get<HeroApiResponse>('content/page/home/hero');
         if (response && response.content) {
+          // Determine which images to use
+          let imagesToUse: string[];
+          
+          if (response.content.images && response.content.images.length > 0) {
+            // Use images array from API
+            imagesToUse = response.content.images;
+          } else if (response.content.imagePath) {
+            // Fallback to single imagePath, but keep default multiple images if available
+            imagesToUse = content.images && content.images.length > 1 
+              ? content.images 
+              : [response.content.imagePath];
+          } else {
+            // Use default images
+            imagesToUse = content.images || ['/images/team.jpg'];
+          }
+
+          // Merge API content with default content, only overriding non-empty values
           setContent({
             badgeText: response.content.badgeText || content.badgeText,
             title: response.content.title || content.title,
-            highlightText: response.content.highlightText || content.highlightText,
             subtitle: response.content.subtitle || content.subtitle,
-            primaryCtaText: response.content.primaryCtaText || content.primaryCtaText,
-            secondaryCtaText: response.content.secondaryCtaText || content.secondaryCtaText,
-            stats: response.content.stats || content.stats,
+            ctaText: response.content.ctaText || content.ctaText,
+            imagePath: response.content.imagePath || content.imagePath,
+            images: imagesToUse,
           });
-          
-          // Load hero image
-          if (response.content.imagePath) {
-            setHeroImage(response.content.imagePath);
-          }
         }
       } catch (error) {
-        console.error('Failed to load hero content', error);
-        // Keep default content on error
+        console.error('Failed to load hero content:', error);
+        // Keep default content on error - graceful degradation
       } finally {
-        setLoading(false);
+        setIsContentReady(true);
       }
     };
 
     fetchContent();
   }, []);
 
+  // Helper function to highlight a word in the title with dental blue
+  const renderTitle = (title: string) => {
+    // Words to potentially highlight in dental blue
+    const highlightWords = ['Healthcare', 'Dental', 'Trusted', 'Partner', 'Care', 'Smile', 'Health'];
+    
+    const words = title.split(' ');
+    return words.map((word, index) => {
+      const cleanWord = word.replace(/[.,!?;:]/, '');
+      const punctuation = word.match(/[.,!?;:]/) ? word.match(/[.,!?;:]/)![0] : '';
+      
+      if (highlightWords.includes(cleanWord)) {
+        return (
+          <span key={index}>
+            <span style={{ color: '#4FC3F7' }}>{cleanWord}</span>
+            {punctuation}{' '}
+          </span>
+        );
+      }
+      return <span key={index}>{word} </span>;
+    });
+  };
+
+  const goToPrevious = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+  };
+
+  const goToNext = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentImageIndex(index);
+  };
+
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary-200 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-200 rounded-full blur-3xl" />
+    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background Image Slider Layer (z-0) */}
+      <div className="absolute inset-0 z-0">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImageIndex}
+            variants={imageVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="absolute inset-0"
+          >
+            <Image
+              src={heroImages[currentImageIndex]}
+              alt={`Om Chabahil Dental Hospital - Image ${currentImageIndex + 1}`}
+              fill
+              priority={currentImageIndex === 0}
+              className="object-cover object-center"
+              sizes="100vw"
+              onLoadingComplete={() => setIsContentReady(true)}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      <div className="container-custom relative z-10 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+      {/* Premium Gradient Overlay Layer (z-1) - Left-to-right for better text readability */}
+      <div 
+        className="absolute inset-0 z-[1]"
+        style={{
+          background: 'linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)'
+        }}
+      />
+
+      {/* Slider Controls - Only show if more than 1 image */}
+      {heroImages.length > 1 && (
+        <>
+          {/* Previous Button */}
+          <button
+            onClick={goToPrevious}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+            aria-label="Previous image"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-soft mb-6">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-neutral-600">
+            <FiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          </button>
+
+          {/* Next Button */}
+          <button
+            onClick={goToNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
+            aria-label="Next image"
+          >
+            <FiChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          </button>
+
+          {/* Dot Indicators */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {heroImages.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex
+                    ? 'bg-white w-6 sm:w-8'
+                    : 'bg-white/50 hover:bg-white/75'
+                }`}
+                aria-label={`Go to image ${index + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Content Container (z-10) - Center-left alignment for premium look */}
+      <motion.div
+        className="relative z-10 flex flex-col items-start justify-center text-left px-6 py-8 sm:px-12 sm:py-12 md:px-16 md:py-16 lg:px-20 lg:py-20 max-w-7xl mx-auto w-full"
+        variants={containerVariants}
+        initial="hidden"
+        animate={isContentReady ? 'visible' : 'hidden'}
+      >
+        <div className="max-w-2xl">
+          {/* Badge - Dental blue accent with soft styling */}
+          {content.badgeText && (
+            <motion.div
+              variants={itemVariants}
+              className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-full mb-4 sm:mb-6"
+              style={{
+                backgroundColor: 'rgba(79, 195, 247, 0.15)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(79, 195, 247, 0.3)'
+              }}
+            >
+              <span 
+                className="w-2 h-2 rounded-full animate-pulse" 
+                style={{ backgroundColor: '#4FC3F7' }}
+              />
+              <span 
+                className="text-xs sm:text-sm font-medium"
+                style={{ color: '#E6F4F8' }}
+              >
                 {content.badgeText}
               </span>
-            </div>
+            </motion.div>
+          )}
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-neutral-900 leading-tight mb-6">
-              {content.title}{' '}
-              <span className="gradient-text">{content.highlightText}</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-neutral-600 mb-8 max-w-lg">
-              {content.subtitle}
-            </p>
-
-            <div className="flex flex-wrap gap-4 mb-10">
-              <Link href="/appointments/book" className="btn-primary btn-lg group">
-                <FiCalendar className="w-5 h-5 mr-2" />
-                {content.primaryCtaText}
-                <FiArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <a href="tel:+9779841234567" className="btn-secondary btn-lg">
-                <FiPhone className="w-5 h-5 mr-2" />
-                {content.secondaryCtaText}
-              </a>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="flex items-center gap-8 pt-8 border-t border-neutral-200">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-primary-600">{content.stats?.yearsExperience}</p>
-                <p className="text-sm text-neutral-500">Years Experience</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-primary-600">{content.stats?.expertDentists}</p>
-                <p className="text-sm text-neutral-500">Expert Dentists</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-primary-600">{content.stats?.happyPatients}</p>
-                <p className="text-sm text-neutral-500">Happy Patients</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Image */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
+          {/* Headline - Pure white with dental blue accent word */}
+          <motion.h1
+            variants={itemVariants}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-4 sm:mb-6"
+            style={{ color: '#FFFFFF' }}
           >
-            <div className="relative aspect-square max-w-lg mx-auto">
-              {/* Main Image */}
-              <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-elevated">
-                <Image
-                  src={heroImage}
-                  alt="Om Chabahil Dental Team"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary-900/30 to-transparent" />
-              </div>
+            {renderTitle(content.title || '')}
+          </motion.h1>
 
-              {/* Floating Cards */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-                className="absolute -left-8 top-1/4 bg-white rounded-2xl shadow-card p-4"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-neutral-900">Certified</p>
-                    <p className="text-sm text-neutral-500">NMC Registered</p>
-                  </div>
-                </div>
-              </motion.div>
+          {/* Subtitle - Soft light blue for calm, trustworthy feel */}
+          <motion.p
+            variants={itemVariants}
+            className="text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed mb-6 sm:mb-8"
+            style={{ color: '#E6F4F8' }}
+          >
+            {content.subtitle}
+          </motion.p>
 
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-                className="absolute -right-8 bottom-1/4 bg-white rounded-2xl shadow-card p-4"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-neutral-900">Patient Care</p>
-                    <p className="text-sm text-neutral-500">First Priority</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Virtual Tour Button */}
-              <Link
-                href="/gallery"
-              >
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.9 }}
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg hover:bg-white transition-colors cursor-pointer"
-                >
-                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
-                    <FiPlay className="w-5 h-5 text-white ml-0.5" />
-                  </div>
-                  <span className="font-medium text-neutral-900">View Gallery & Tour</span>
-                </motion.div>
-              </Link>
-            </div>
+          {/* CTA Button - Clean dental blue */}
+          <motion.div variants={itemVariants}>
+            <Link
+              href="/appointments/book"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 sm:px-8 sm:py-4 min-h-[44px] min-w-[44px] font-semibold text-base sm:text-lg text-white rounded-lg shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 touch-manipulation"
+              style={{
+                backgroundColor: '#0288D1',
+                boxShadow: '0 4px 14px 0 rgba(2, 136, 209, 0.39)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#0277BD';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px 0 rgba(2, 136, 209, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#0288D1';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 14px 0 rgba(2, 136, 209, 0.39)';
+              }}
+            >
+              <FiCalendar className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+              <span>{content.ctaText}</span>
+            </Link>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

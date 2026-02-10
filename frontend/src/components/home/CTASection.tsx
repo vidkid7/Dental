@@ -56,8 +56,8 @@ export function CTASection() {
               </div>
               <div>
                 <p className="text-primary-200 text-sm mb-1">Call us anytime</p>
-                <a href="tel:+1234567890" className="text-2xl font-bold text-white hover:text-accent-400 transition-colors">
-                  +1 (234) 567-890
+                <a href="tel:014592100" className="text-2xl font-bold text-white hover:text-accent-400 transition-colors">
+                  0145-92100
                 </a>
               </div>
             </div>
@@ -70,7 +70,7 @@ export function CTASection() {
               <div>
                 <p className="text-primary-200 text-sm mb-1">Visit us at</p>
                 <p className="text-xl font-semibold text-white">
-                  123 Dental Avenue, Medical District
+                  Chabahil, Koteshwor, Kathmandu, Nepal
                 </p>
               </div>
             </div>
