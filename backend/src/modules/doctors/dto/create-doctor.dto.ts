@@ -6,6 +6,7 @@ import {
   IsUUID,
   IsBoolean,
   Min,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -24,8 +25,9 @@ export class CreateDoctorDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @ValidateIf((o) => o.photo !== null)
   @IsString()
-  photo?: string;
+  photo?: string | null;
 
   @ApiProperty({ example: 'BDS, MDS (Orthodontics)' })
   @IsString()
