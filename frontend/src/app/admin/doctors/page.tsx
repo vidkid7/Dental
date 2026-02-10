@@ -23,6 +23,7 @@ interface Doctor {
   name: string;
   email: string;
   phone: string;
+  photo?: string;
   qualification: string;
   specialization: string;
   experience: number;
@@ -197,15 +198,25 @@ export default function DoctorsPage() {
                 <tr key={doctor.id} className="hover:bg-neutral-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                        <span className="text-primary-600 font-semibold text-sm">
-                          {doctor.name
-                            .split(' ')
-                            .slice(0, 2)
-                            .map((n) => n[0])
-                            .join('')}
-                        </span>
-                      </div>
+                      {doctor.photo ? (
+                        <div className="w-10 h-10 rounded-full overflow-hidden">
+                          <img
+                            src={doctor.photo}
+                            alt={doctor.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                          <span className="text-primary-600 font-semibold text-sm">
+                            {doctor.name
+                              .split(' ')
+                              .slice(0, 2)
+                              .map((n) => n[0])
+                              .join('')}
+                          </span>
+                        </div>
+                      )}
                       <div>
                         <p className="font-medium text-neutral-900">{doctor.name}</p>
                         <p className="text-sm text-neutral-500">{doctor.qualification}</p>

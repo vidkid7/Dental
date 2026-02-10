@@ -3,12 +3,13 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiArrowLeft, FiClock, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiArrowLeft, FiClock, FiPlus, FiTrash2, FiUpload, FiX } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import toast from 'react-hot-toast';
 import { get, patch, post, del, getErrorMessage } from '@/lib/api';
+import axios from 'axios';
 
 interface DoctorForm {
   id: string;
@@ -20,6 +21,7 @@ interface DoctorForm {
   experience: number;
   consultationFee?: number;
   departmentId: string;
+  photo?: string;
 }
 
 interface DepartmentOption {
@@ -51,6 +53,9 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingAvailability, setIsAddingAvailability] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [newAvailability, setNewAvailability] = useState({
     dayOfWeek: 1,
     startTime: '09:00',
@@ -70,6 +75,11 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         setForm(doctor);
         setDepartments(deptList);
         setAvailabilities(Array.isArray(avail) ? avail : []);
+        
+        // Set existing photo as preview
+        if (doctor.photo) {
+          setImagePreview(doctor.photo);
+        }
       } catch (error) {
         console.error('Failed to load doctor data', error);
         toast.error(getErrorMessage(error) || 'Failed to load doctor data');
@@ -119,6 +129,40 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     setIsSubmitting(true);
 
     try {
+      let photoUrl: string | undefined = form.photo;
+
+      // Upload new photo if selected
+      if (photoFile) {
+        setIsUploadingPhoto(true);
+        try {
+          const formData = new FormData();
+          formData.append('file', photoFile);
+          formData.append('folder', 'doctors');
+
+          const token = localStorage.getItem('accessToken');
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+          
+          const uploadResponse = await axios.post(
+            `${apiUrl}/api/v1/media/upload`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          photoUrl = uploadResponse.data.url;
+          toast.success('Photo uploaded successfully');
+        } catch (error) {
+          console.error('Failed to upload photo', error);
+          toast.error('Failed to upload photo, but continuing...');
+        } finally {
+          setIsUploadingPhoto(false);
+        }
+      }
+
       await patch<DoctorForm, Partial<DoctorForm>>(`doctors/${form.id}`, {
         name: form.name,
         email: form.email,
@@ -128,6 +172,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         experience: Number(form.experience) || 0,
         consultationFee: form.consultationFee ? Number(form.consultationFee) : undefined,
         departmentId: form.departmentId,
+        photo: photoUrl,
       });
       toast.success('Doctor updated successfully');
       router.push('/admin/doctors');
@@ -173,6 +218,35 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(form?.photo || null);
+    setPhotoFile(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
@@ -197,6 +271,55 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-soft p-6 space-y-6 max-w-3xl"
       >
+        {/* Photo Upload Section */}
+        <div className="border-b border-neutral-200 pb-6">
+          <h3 className="text-sm font-semibold text-neutral-800 mb-4">Doctor Photo</h3>
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              {imagePreview ? (
+                <div className="relative w-24 h-24 rounded-full overflow-hidden">
+                  <img
+                    src={imagePreview}
+                    alt="Doctor photo"
+                    className="w-full h-full object-cover"
+                  />
+                  {photoFile && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <FiX className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <FiUpload className="w-6 h-6 text-neutral-400" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
+                <FiUpload className="w-4 h-4" />
+                {imagePreview ? 'Change Photo' : 'Upload Photo'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </label>
+              <p className="text-sm text-neutral-500 mt-2">
+                JPG, PNG. Max 5MB. Photo will be uploaded to Cloudinary.
+              </p>
+              {isUploadingPhoto && (
+                <p className="text-sm text-primary-600 mt-1">Uploading photo...</p>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
           <Input
             label="Full Name"

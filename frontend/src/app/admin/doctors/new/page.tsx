@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FiArrowLeft, FiSave, FiUpload } from 'react-icons/fi';
+import { FiArrowLeft, FiSave, FiUpload, FiX } from 'react-icons/fi';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 import { get, post, getErrorMessage } from '@/lib/api';
+import axios from 'axios';
 
 const doctorSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -48,6 +49,8 @@ export default function AddDoctorPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [departments, setDepartments] = useState<DepartmentOption[]>([]);
 
   const {
@@ -75,6 +78,40 @@ export default function AddDoctorPage() {
   const onSubmit = async (data: DoctorFormData) => {
     setIsLoading(true);
     try {
+      let photoUrl: string | undefined;
+
+      // Upload photo to Cloudinary if selected
+      if (photoFile) {
+        setIsUploadingPhoto(true);
+        try {
+          const formData = new FormData();
+          formData.append('file', photoFile);
+          formData.append('folder', 'doctors');
+
+          const token = localStorage.getItem('accessToken');
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+          
+          const uploadResponse = await axios.post(
+            `${apiUrl}/api/v1/media/upload`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          photoUrl = uploadResponse.data.url;
+          toast.success('Photo uploaded successfully');
+        } catch (error) {
+          console.error('Failed to upload photo', error);
+          toast.error('Failed to upload photo, but continuing...');
+        } finally {
+          setIsUploadingPhoto(false);
+        }
+      }
+
       const doctor = await post<{ id: string }>('doctors', {
         name: data.name,
         email: data.email,
@@ -85,6 +122,7 @@ export default function AddDoctorPage() {
         consultationFee: Number(data.consultationFee) || 0,
         bio: data.about,
         departmentId: data.departmentId,
+        photo: photoUrl,
         isActive: true,
       });
       toast.success('Doctor added. Set their available days and times below.');
@@ -100,12 +138,30 @@ export default function AddDoctorPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+
+      setPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setPhotoFile(null);
   };
 
   return (
@@ -217,12 +273,19 @@ export default function AddDoctorPage() {
               <h2 className="text-lg font-heading font-semibold mb-4">Photo</h2>
               <div className="text-center">
                 {imagePreview ? (
-                  <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-4">
+                  <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden mb-4">
                     <img
                       src={imagePreview}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    >
+                      <FiX className="w-4 h-4" />
+                    </button>
                   </div>
                 ) : (
                   <div className="w-32 h-32 mx-auto rounded-full bg-neutral-100 flex items-center justify-center mb-4">
@@ -231,7 +294,7 @@ export default function AddDoctorPage() {
                 )}
                 <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
                   <FiUpload className="w-4 h-4" />
-                  Upload Photo
+                  {imagePreview ? 'Change Photo' : 'Upload Photo'}
                   <input
                     type="file"
                     accept="image/*"
@@ -240,8 +303,11 @@ export default function AddDoctorPage() {
                   />
                 </label>
                 <p className="text-sm text-neutral-500 mt-2">
-                  JPG, PNG. Max 2MB.
+                  JPG, PNG. Max 5MB.
                 </p>
+                {isUploadingPhoto && (
+                  <p className="text-sm text-primary-600 mt-2">Uploading photo...</p>
+                )}
               </div>
             </div>
 
