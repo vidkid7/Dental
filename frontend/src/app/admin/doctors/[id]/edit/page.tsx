@@ -21,7 +21,7 @@ interface DoctorForm {
   experience: number;
   consultationFee?: number;
   departmentId: string;
-  photo?: string;
+  photo?: string | null;
 }
 
 interface DepartmentOption {
@@ -129,7 +129,12 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     setIsSubmitting(true);
 
     try {
-      let photoUrl: string | undefined = form.photo;
+      let photoUrl: string | undefined | null = form.photo;
+
+      // If photo was deleted (imagePreview is null but form had a photo), set to null
+      if (!imagePreview && form.photo) {
+        photoUrl = null;
+      }
 
       // Upload new photo if selected
       if (photoFile) {
@@ -169,7 +174,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         }
       }
 
-      await patch<DoctorForm, Partial<DoctorForm>>(`doctors/${form.id}`, {
+      const updateData: Partial<DoctorForm> & { photo?: string | null } = {
         name: form.name,
         email: form.email,
         phone: form.phone,
@@ -178,8 +183,10 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         experience: Number(form.experience) || 0,
         consultationFee: form.consultationFee ? Number(form.consultationFee) : undefined,
         departmentId: form.departmentId,
-        photo: photoUrl,
-      });
+        photo: photoUrl === null ? null : photoUrl,
+      };
+
+      await patch<DoctorForm, typeof updateData>(`doctors/${form.id}`, updateData);
       toast.success('Doctor updated successfully');
       router.push('/admin/doctors');
     } catch (error) {
