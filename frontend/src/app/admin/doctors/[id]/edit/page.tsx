@@ -263,7 +263,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
           </div>
         </div>
         <Link href="/admin/doctors">
-          <Button variant="outline">View All Doctors</Button>
+          <Button variant="secondary">View All Doctors</Button>
         </Link>
       </div>
 
