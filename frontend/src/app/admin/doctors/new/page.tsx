@@ -88,10 +88,11 @@ export default function AddDoctorPage() {
           formData.append('file', photoFile);
           formData.append('folder', 'doctors');
 
-          const token = localStorage.getItem('accessToken');
+          const token = localStorage.getItem('auth_token');
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
           
           console.log('Uploading to:', `${apiUrl}/api/v1/media/upload`);
+          console.log('Token exists:', !!token);
           console.log('File:', photoFile.name, photoFile.type, photoFile.size);
           
           const uploadResponse = await axios.post(
