@@ -23,7 +23,12 @@ export class DoctorsService {
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
-    const doctor = this.doctorsRepository.create(createDoctorDto);
+    // Convert null to undefined for TypeORM compatibility
+    const doctorData = { ...createDoctorDto };
+    if (doctorData.photo === null) {
+      doctorData.photo = undefined;
+    }
+    const doctor = this.doctorsRepository.create(doctorData);
     return this.doctorsRepository.save(doctor);
   }
 
@@ -70,7 +75,12 @@ export class DoctorsService {
 
   async update(id: string, updateDoctorDto: UpdateDoctorDto): Promise<Doctor> {
     const doctor = await this.findOne(id);
-    Object.assign(doctor, updateDoctorDto);
+    // Convert null to undefined for TypeORM compatibility
+    const updateData = { ...updateDoctorDto };
+    if (updateData.photo === null) {
+      updateData.photo = undefined;
+    }
+    Object.assign(doctor, updateData);
     return this.doctorsRepository.save(doctor);
   }
 
