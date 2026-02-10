@@ -306,9 +306,11 @@ export default function BookAppointmentPage() {
                     {/* Week Navigation */}
                     <div className="flex items-center justify-between mb-4">
                       <button
+                        type="button"
                         onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}
                         disabled={isBefore(addDays(currentWeekStart, -7), startOfDay(new Date()))}
                         className="p-2 rounded-lg hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        aria-label="Previous week"
                       >
                         <FiArrowLeft className="w-5 h-5" />
                       </button>
@@ -316,9 +318,11 @@ export default function BookAppointmentPage() {
                         {format(currentWeekStart, 'MMMM yyyy')}
                       </span>
                       <button
+                        type="button"
                         onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}
                         disabled={currentWeekStart > addDays(new Date(), 83)}
                         className="p-2 rounded-lg hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        aria-label="Next week"
                       >
                         <FiArrowRight className="w-5 h-5" />
                       </button>
