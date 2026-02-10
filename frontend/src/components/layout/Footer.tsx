@@ -59,7 +59,7 @@ export function Footer() {
                 <h2 className="font-heading font-bold text-lg leading-tight">
                   Om Chabahil Dental
                 </h2>
-                <p className="text-xs text-neutral-400">Koteshwor, Kathmandu</p>
+                <p className="text-xs text-neutral-400">Chabahil, Koteshwor, Kathmandu</p>
               </div>
             </Link>
             <p className="text-neutral-400 mb-6 max-w-sm">
