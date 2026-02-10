@@ -250,13 +250,6 @@ export default function AdminLoginPage() {
                       Forgot your password?
                     </button>
                   </form>
-
-                  <div className="mt-6 pt-6 border-t border-neutral-100">
-                    <p className="text-center text-sm text-neutral-500">
-                      <span className="font-medium">Demo credentials:</span><br />
-                      admin@omchabahildental.com.np / Admin@123
-                    </p>
-                  </div>
                 </motion.div>
               ) : (
                 <motion.div
