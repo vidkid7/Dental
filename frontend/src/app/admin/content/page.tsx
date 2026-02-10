@@ -75,6 +75,8 @@ export default function ContentManagementPage() {
     { id: 'services', label: 'Services Section', icon: FiGrid },
     { id: 'contact', label: 'Contact Section', icon: FiPhone },
     { id: 'statistics', label: 'Statistics', icon: FiStar },
+    { id: 'home-images', label: 'Home Images', icon: FiImage, href: '/admin/content/home-images' },
+    { id: 'about-images', label: 'About Images', icon: FiImage, href: '/admin/content/about-images' },
   ];
 
   // Load content from database on mount
@@ -86,7 +88,7 @@ export default function ContentManagementPage() {
         
         // Load hero section
         try {
-          const heroData = await get(`content/page/${pageSlug}/hero`);
+          const heroData: any = await get(`content/page/${pageSlug}/hero`);
           if (heroData && heroData.content) {
             const c = heroData.content as any;
             setHeroContent({
@@ -107,7 +109,7 @@ export default function ContentManagementPage() {
 
         // Load about section
         try {
-          const aboutData = await get(`content/page/${pageSlug}/about`);
+          const aboutData: any = await get(`content/page/${pageSlug}/about`);
           if (aboutData && aboutData.content) {
             const c = aboutData.content as any;
             setAboutContent({
@@ -127,7 +129,7 @@ export default function ContentManagementPage() {
 
         // Load services section
         try {
-          const servicesData = await get(`content/page/${pageSlug}/services`);
+          const servicesData: any = await get(`content/page/${pageSlug}/services`);
           if (servicesData && servicesData.content) {
             const c = servicesData.content as any;
             setServicesContent({
@@ -142,7 +144,7 @@ export default function ContentManagementPage() {
 
         // Load contact section
         try {
-          const contactData = await get(`content/page/${pageSlug}/contact`);
+          const contactData: any = await get(`content/page/${pageSlug}/contact`);
           if (contactData && contactData.content) {
             const c = contactData.content as any;
             setContactContent({
@@ -265,20 +267,34 @@ export default function ContentManagementPage() {
           <div className="bg-white rounded-xl shadow-soft p-4 sticky top-24">
             <h3 className="text-sm font-medium text-neutral-500 mb-3 uppercase tracking-wider">Sections</h3>
             <nav className="space-y-1">
-              {sections.map((section) => (
-                <button
-                  key={section.id}
-                  onClick={() => setActiveSection(section.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    activeSection === section.id
-                      ? 'bg-primary-600 text-white'
-                      : 'text-neutral-600 hover:bg-neutral-100'
-                  }`}
-                >
-                  <section.icon className="w-5 h-5" />
-                  {section.label}
-                </button>
-              ))}
+              {sections.map((section) => {
+                if (section.href) {
+                  return (
+                    <a
+                      key={section.id}
+                      href={section.href}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-neutral-600 hover:bg-neutral-100"
+                    >
+                      <section.icon className="w-5 h-5" />
+                      {section.label}
+                    </a>
+                  );
+                }
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      activeSection === section.id
+                        ? 'bg-primary-600 text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                    }`}
+                  >
+                    <section.icon className="w-5 h-5" />
+                    {section.label}
+                  </button>
+                );
+              })}
             </nav>
           </div>
         </div>

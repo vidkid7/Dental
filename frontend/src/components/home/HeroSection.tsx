@@ -35,6 +35,7 @@ export function HeroSection() {
       happyPatients: '5000+',
     },
   });
+  const [heroImage, setHeroImage] = useState('/images/team.jpg');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,6 +52,11 @@ export function HeroSection() {
             secondaryCtaText: response.content.secondaryCtaText || content.secondaryCtaText,
             stats: response.content.stats || content.stats,
           });
+          
+          // Load hero image
+          if (response.content.imagePath) {
+            setHeroImage(response.content.imagePath);
+          }
         }
       } catch (error) {
         console.error('Failed to load hero content', error);
@@ -135,7 +141,7 @@ export function HeroSection() {
               {/* Main Image */}
               <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-elevated">
                 <Image
-                  src="/images/team.jpg"
+                  src={heroImage}
                   alt="Om Chabahil Dental Team"
                   fill
                   className="object-cover"

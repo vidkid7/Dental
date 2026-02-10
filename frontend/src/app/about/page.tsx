@@ -1,12 +1,10 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiAward, FiUsers, FiTarget, FiHeart, FiMapPin, FiPhone } from 'react-icons/fi';
-
-export const metadata: Metadata = {
-  title: 'About Us | Om Chabahil Dental Hospital',
-  description: 'Learn about Om Chabahil Dental Hospital - Your trusted dental care partner in Kathmandu, Nepal. Quality dental services with modern technology.',
-};
 
 const values = [
   {
@@ -43,6 +41,56 @@ const services = [
 ];
 
 export default function AboutPage() {
+  const [mainImage, setMainImage] = useState('/images/team.jpg');
+  const [clinicImages, setClinicImages] = useState([
+    '/images/clinic-1.jpg',
+    '/images/clinic-2.jpg',
+    '/images/clinic-3.jpg',
+    '/images/clinic-4.jpg',
+  ]);
+
+  useEffect(() => {
+    // Load images from API
+    const loadImages = async () => {
+      try {
+        console.log('Loading images from API...');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const fullUrl = `${apiUrl}/api/v1`;
+        console.log('API Base URL:', fullUrl);
+        
+        const mainResponse = await fetch(`${fullUrl}/content/page/about/main`);
+        console.log('Main image response status:', mainResponse.status);
+        
+        if (mainResponse.ok) {
+          const data = await mainResponse.json();
+          console.log('Main image data:', data);
+          
+          if (data?.content?.imagePath) {
+            console.log('Setting main image to:', data.content.imagePath);
+            setMainImage(data.content.imagePath);
+          }
+        }
+
+        const servicesResponse = await fetch(`${fullUrl}/content/page/about/services-overview`);
+        console.log('Services images response status:', servicesResponse.status);
+        
+        if (servicesResponse.ok) {
+          const servicesData = await servicesResponse.json();
+          console.log('Services images data:', servicesData);
+          
+          if (servicesData?.content?.imagePaths && Array.isArray(servicesData.content.imagePaths)) {
+            console.log('Setting clinic images to:', servicesData.content.imagePaths);
+            setClinicImages(servicesData.content.imagePaths);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load images', error);
+        // Continue with default images
+      }
+    };
+
+    loadImages();
+  }, []);
   return (
     <>
       {/* Hero Section */}
@@ -70,7 +118,7 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-elevated">
               <Image
-                src="/images/team.jpg"
+                src={mainImage}
                 alt="Om Chabahil Dental Team"
                 fill
                 className="object-cover"
@@ -163,7 +211,7 @@ export default function AboutPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="relative aspect-square rounded-xl overflow-hidden shadow-card">
                 <Image
-                  src="/images/clinic-1.jpg"
+                  src={clinicImages[0]}
                   alt="Dental Clinic"
                   fill
                   className="object-cover"
@@ -171,7 +219,7 @@ export default function AboutPage() {
               </div>
               <div className="relative aspect-square rounded-xl overflow-hidden shadow-card mt-8">
                 <Image
-                  src="/images/clinic-2.jpg"
+                  src={clinicImages[1]}
                   alt="Dental Equipment"
                   fill
                   className="object-cover"
@@ -179,7 +227,7 @@ export default function AboutPage() {
               </div>
               <div className="relative aspect-square rounded-xl overflow-hidden shadow-card">
                 <Image
-                  src="/images/clinic-3.jpg"
+                  src={clinicImages[2]}
                   alt="Treatment Room"
                   fill
                   className="object-cover"
@@ -187,7 +235,7 @@ export default function AboutPage() {
               </div>
               <div className="relative aspect-square rounded-xl overflow-hidden shadow-card mt-8">
                 <Image
-                  src="/images/clinic-4.jpg"
+                  src={clinicImages[3]}
                   alt="Dental Procedure"
                   fill
                   className="object-cover"

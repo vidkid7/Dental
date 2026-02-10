@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -15,6 +16,45 @@ const features = [
 ];
 
 export function AboutSection() {
+  const [clinicImages, setClinicImages] = useState([
+    '/images/clinic-1.jpg',
+    '/images/clinic-2.jpg',
+    '/images/clinic-3.jpg',
+    '/images/clinic-4.jpg',
+  ]);
+
+  useEffect(() => {
+    // Load images from API
+    const loadImages = async () => {
+      try {
+        console.log('[Home About Section] Loading images from API...');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        console.log('[Home About Section] API URL:', apiUrl);
+        
+        const response = await fetch(`${apiUrl}/api/v1/content/page/home/about`);
+        console.log('[Home About Section] Response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[Home About Section] Full response data:', JSON.stringify(data, null, 2));
+          
+          if (data?.content?.imagePaths && Array.isArray(data.content.imagePaths)) {
+            console.log('[Home About Section] Setting all images to:', data.content.imagePaths);
+            setClinicImages(data.content.imagePaths);
+          } else {
+            console.log('[Home About Section] No imagePaths array found in response');
+          }
+        } else {
+          console.log('[Home About Section] Response not OK:', response.status, response.statusText);
+        }
+      } catch (error) {
+        console.error('[Home About Section] Failed to load images', error);
+        // Continue with default images
+      }
+    };
+
+    loadImages();
+  }, []);
   return (
     <section className="section-padding bg-neutral-50">
       <div className="container-custom">
@@ -31,7 +71,7 @@ export function AboutSection() {
               <div className="space-y-4">
                 <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-card">
                   <Image
-                    src="/images/clinic-1.jpg"
+                    src={clinicImages[0]}
                     alt="Om Chabahil Dental Clinic"
                     fill
                     className="object-cover"
@@ -39,7 +79,7 @@ export function AboutSection() {
                 </div>
                 <div className="relative aspect-square rounded-2xl overflow-hidden shadow-card">
                   <Image
-                    src="/images/clinic-2.jpg"
+                    src={clinicImages[1]}
                     alt="Dental Equipment"
                     fill
                     className="object-cover"
@@ -49,7 +89,7 @@ export function AboutSection() {
               <div className="pt-8 space-y-4">
                 <div className="relative aspect-square rounded-2xl overflow-hidden shadow-card">
                   <Image
-                    src="/images/clinic-3.jpg"
+                    src={clinicImages[2]}
                     alt="Treatment Room"
                     fill
                     className="object-cover"
@@ -57,7 +97,7 @@ export function AboutSection() {
                 </div>
                 <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-card">
                   <Image
-                    src="/images/clinic-4.jpg"
+                    src={clinicImages[3]}
                     alt="Dental Procedure"
                     fill
                     className="object-cover"
