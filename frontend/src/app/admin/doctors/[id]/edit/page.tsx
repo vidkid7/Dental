@@ -132,9 +132,15 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     try {
       let photoUrl: string | undefined | null = form.photo;
 
+      console.log('=== Photo Removal Debug ===');
+      console.log('photoDeleted flag:', photoDeleted);
+      console.log('form.photo:', form.photo);
+      console.log('imagePreview:', imagePreview);
+
       // If photo was explicitly deleted, set to null
       if (photoDeleted) {
         photoUrl = null;
+        console.log('Setting photoUrl to null for deletion');
       }
 
       // Upload new photo if selected
@@ -186,6 +192,9 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
         departmentId: form.departmentId,
         photo: photoUrl === null ? null : photoUrl,
       };
+
+      console.log('Update data being sent:', updateData);
+      console.log('Photo value in update:', updateData.photo);
 
       await patch<DoctorForm, typeof updateData>(`doctors/${form.id}`, updateData);
       toast.success('Doctor updated successfully');
