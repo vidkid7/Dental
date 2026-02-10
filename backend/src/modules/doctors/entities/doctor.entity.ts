@@ -25,7 +25,7 @@ export class Doctor extends BaseEntity {
   phone: string;
 
   @Column({ nullable: true })
-  photo?: string | null;
+  photo?: string;
 
   @Column()
   qualification: string;
