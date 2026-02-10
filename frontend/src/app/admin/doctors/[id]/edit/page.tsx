@@ -56,6 +56,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoDeleted, setPhotoDeleted] = useState(false);
   const [newAvailability, setNewAvailability] = useState({
     dayOfWeek: 1,
     startTime: '09:00',
@@ -131,8 +132,8 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     try {
       let photoUrl: string | undefined | null = form.photo;
 
-      // If photo was deleted (imagePreview is null but form had a photo), set to null
-      if (!imagePreview && form.photo) {
+      // If photo was explicitly deleted, set to null
+      if (photoDeleted) {
         photoUrl = null;
       }
 
@@ -247,6 +248,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
       }
 
       setPhotoFile(file);
+      setPhotoDeleted(false); // Reset deletion flag when new photo is selected
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -264,6 +266,7 @@ export default function EditDoctorPage({ params }: { params: { id: string } }) {
     if (window.confirm('Are you sure you want to remove this photo?')) {
       setImagePreview(null);
       setPhotoFile(null);
+      setPhotoDeleted(true);
       if (form) {
         setForm({ ...form, photo: undefined });
       }
