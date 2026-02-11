@@ -27,17 +27,28 @@ interface Service {
   order: number;
 }
 
-// Hardcoded service images mapping
+// Hardcoded service images mapping - All UNIQUE images from Unsplash and Pexels
 const serviceImages: Record<string, string> = {
+  // New 10 service categories - ALL DIFFERENT IMAGES
+  'diagnostic-services': 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&q=80', // X-ray diagnostic
+  'restorative-fillings': 'https://images.pexels.com/photos/3845630/pexels-photo-3845630.jpeg?auto=compress&cs=tinysrgb&w=800', // Dental filling
+  'root-canal-treatment': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80', // Root canal
+  'crowns-implants': 'https://images.pexels.com/photos/3779705/pexels-photo-3779705.jpeg?auto=compress&cs=tinysrgb&w=800', // Crown/implant
+  'dentures': 'https://images.pexels.com/photos/3845653/pexels-photo-3845653.jpeg?auto=compress&cs=tinysrgb&w=800', // Dentures/prosthetics
+  'orthodontic-treatment': 'https://images.pexels.com/photos/6528861/pexels-photo-6528861.jpeg?auto=compress&cs=tinysrgb&w=800', // Braces
+  'dental-appliances': 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=800&q=80', // Dental appliances
+  'oral-surgery': 'https://images.pexels.com/photos/3938022/pexels-photo-3938022.jpeg?auto=compress&cs=tinysrgb&w=800', // Oral surgery
+  'periodontics-treatment': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80', // Gum treatment
+  'pediatric-dentistry': 'https://images.pexels.com/photos/8460157/pexels-photo-8460157.jpeg?auto=compress&cs=tinysrgb&w=800', // Child dentistry
+  
+  // Legacy service slugs (for backward compatibility)
   'general-dentistry': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80',
-  'orthodontics': 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&q=80',
-  'oral-maxillofacial-surgery': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80',
-  'oral-surgery': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80',
-  'pediatric-dentistry': 'https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=800&q=80',
+  'orthodontics': 'https://images.pexels.com/photos/6528861/pexels-photo-6528861.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'oral-maxillofacial-surgery': 'https://images.unsplash.com/photo-1629909615957-be38b9e8e4c4?w=800&q=80',
   'cosmetic-dentistry': 'https://images.pexels.com/photos/3845653/pexels-photo-3845653.jpeg?auto=compress&cs=tinysrgb&w=800',
-  'endodontics': 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?w=800&q=80',
-  'prosthodontics': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80',
-  'periodontics': 'https://images.unsplash.com/photo-1588776814546-daab30f310ce?w=800&q=80',
+  'endodontics': 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&q=80',
+  'prosthodontics': 'https://images.pexels.com/photos/3779705/pexels-photo-3779705.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'periodontics': 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80',
 };
 
 // Get service image based on slug
