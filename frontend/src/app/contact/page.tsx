@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
+import { post, getErrorMessage } from '@/lib/api';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -26,6 +27,7 @@ type ContactFormData = z.infer<typeof contactSchema>;
 const enquiryTypes = [
   { value: 'general', label: 'General Enquiry' },
   { value: 'appointment', label: 'Appointment Related' },
+  { value: 'admission', label: 'Admission Enquiry' },
   { value: 'services', label: 'Services Information' },
   { value: 'feedback', label: 'Feedback' },
   { value: 'complaint', label: 'Complaint' },
@@ -69,13 +71,21 @@ export default function ContactPage() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      // TODO: Implement API call
-      console.log(data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success('Your message has been sent successfully!');
+      // Submit enquiry to backend API
+      await post('enquiries', {
+        name: data.name,
+        email: data.email,
+        phone: data.phone || undefined,
+        type: data.type,
+        subject: data.subject,
+        message: data.message,
+      });
+      
+      toast.success('Your message has been sent successfully! We will get back to you soon.');
       reset();
     } catch (error) {
-      toast.error('Failed to send message. Please try again.');
+      console.error('Failed to submit enquiry:', error);
+      toast.error(getErrorMessage(error) || 'Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
