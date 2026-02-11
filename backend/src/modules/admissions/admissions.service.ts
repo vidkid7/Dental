@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
@@ -14,8 +14,8 @@ export class AdmissionsService {
   constructor(
     @InjectRepository(AdmissionApplication)
     private admissionsRepository: Repository<AdmissionApplication>,
-    @InjectQueue('notifications')
-    private notificationsQueue: Queue,
+    @Optional() @InjectQueue('notifications')
+    private notificationsQueue?: Queue,
   ) {}
 
   async create(createAdmissionDto: CreateAdmissionDto): Promise<AdmissionApplication> {
@@ -101,13 +101,19 @@ export class AdmissionsService {
     
     const savedApplication = await this.admissionsRepository.save(application);
 
-    // Send confirmation notification
-    await this.notificationsQueue.add('admission-submitted', {
-      applicationId: savedApplication.id,
-      applicationNumber: savedApplication.applicationNumber,
-      email: savedApplication.email,
-      name: `${savedApplication.firstName} ${savedApplication.lastName}`,
-    });
+    // Send confirmation notification (only if queue is available)
+    if (this.notificationsQueue) {
+      try {
+        await this.notificationsQueue.add('admission-submitted', {
+          applicationId: savedApplication.id,
+          applicationNumber: savedApplication.applicationNumber,
+          email: savedApplication.email,
+          name: `${savedApplication.firstName} ${savedApplication.lastName}`,
+        });
+      } catch (error) {
+        console.warn('Failed to queue notification:', error.message);
+      }
+    }
 
     return savedApplication;
   }
@@ -121,14 +127,20 @@ export class AdmissionsService {
     
     const savedApplication = await this.admissionsRepository.save(application);
 
-    // Send status update notification
-    await this.notificationsQueue.add('admission-status-update', {
-      applicationId: savedApplication.id,
-      applicationNumber: savedApplication.applicationNumber,
-      email: savedApplication.email,
-      name: `${savedApplication.firstName} ${savedApplication.lastName}`,
-      status,
-    });
+    // Send status update notification (only if queue is available)
+    if (this.notificationsQueue) {
+      try {
+        await this.notificationsQueue.add('admission-status-update', {
+          applicationId: savedApplication.id,
+          applicationNumber: savedApplication.applicationNumber,
+          email: savedApplication.email,
+          name: `${savedApplication.firstName} ${savedApplication.lastName}`,
+          status,
+        });
+      } catch (error) {
+        console.warn('Failed to queue notification:', error.message);
+      }
+    }
 
     return savedApplication;
   }

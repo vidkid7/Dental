@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BullModule } from '@nestjs/bull';
 import { EnquiriesService } from './enquiries.service';
 import { EnquiriesController } from './enquiries.controller';
 import { Enquiry } from './entities/enquiry.entity';
@@ -9,7 +8,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Enquiry]),
-    BullModule.registerQueue({ name: 'notifications' }),
+    // BullModule removed - notifications queue is optional
     NotificationsModule,
   ],
   controllers: [EnquiriesController],

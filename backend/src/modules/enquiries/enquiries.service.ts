@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { InjectQueue } from '@nestjs/bull';
@@ -13,22 +13,28 @@ export class EnquiriesService {
   constructor(
     @InjectRepository(Enquiry)
     private enquiriesRepository: Repository<Enquiry>,
-    @InjectQueue('notifications')
-    private notificationsQueue: Queue,
+    @Optional() @InjectQueue('notifications')
+    private notificationsQueue?: Queue,
   ) {}
 
   async create(createEnquiryDto: CreateEnquiryDto): Promise<Enquiry> {
     const enquiry = this.enquiriesRepository.create(createEnquiryDto);
     const savedEnquiry = await this.enquiriesRepository.save(enquiry);
 
-    // Send notification to admin
-    await this.notificationsQueue.add('new-enquiry', {
-      enquiryId: savedEnquiry.id,
-      type: savedEnquiry.type,
-      name: savedEnquiry.name,
-      email: savedEnquiry.email,
-      subject: savedEnquiry.subject,
-    });
+    // Send notification to admin (only if queue is available)
+    if (this.notificationsQueue) {
+      try {
+        await this.notificationsQueue.add('new-enquiry', {
+          enquiryId: savedEnquiry.id,
+          type: savedEnquiry.type,
+          name: savedEnquiry.name,
+          email: savedEnquiry.email,
+          subject: savedEnquiry.subject,
+        });
+      } catch (error) {
+        console.warn('Failed to queue notification:', error.message);
+      }
+    }
 
     return savedEnquiry;
   }
@@ -90,13 +96,19 @@ export class EnquiriesService {
     
     const savedEnquiry = await this.enquiriesRepository.save(enquiry);
 
-    // Send response notification to user
-    await this.notificationsQueue.add('enquiry-response', {
-      enquiryId: savedEnquiry.id,
-      email: savedEnquiry.email,
-      name: savedEnquiry.name,
-      response,
-    });
+    // Send response notification to user (only if queue is available)
+    if (this.notificationsQueue) {
+      try {
+        await this.notificationsQueue.add('enquiry-response', {
+          enquiryId: savedEnquiry.id,
+          email: savedEnquiry.email,
+          name: savedEnquiry.name,
+          response,
+        });
+      } catch (error) {
+        console.warn('Failed to queue notification:', error.message);
+      }
+    }
 
     return savedEnquiry;
   }
