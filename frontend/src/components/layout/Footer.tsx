@@ -91,9 +91,19 @@ export function Footer() {
 
             {/* Koteshwor Branch */}
             <div className="mt-6 pt-6 border-t border-neutral-800">
-              <h3 className="font-heading font-semibold text-base mb-3 text-primary-400">
-                Koteshwor Branch
-              </h3>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 relative bg-white rounded-lg p-1 flex-shrink-0">
+                  <Image
+                    src="/images/koteshwor-logo.png"
+                    alt="Koteshwor Branch"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <h3 className="font-heading font-semibold text-base text-primary-400">
+                  Koteshwor Branch
+                </h3>
+              </div>
               <div className="space-y-2">
                 <a href="mailto:ocdkoteshwor@gmail.com" className="flex items-center gap-3 text-neutral-400 hover:text-white transition-colors">
                   <FiMail className="w-4 h-4 flex-shrink-0 text-primary-400" />
