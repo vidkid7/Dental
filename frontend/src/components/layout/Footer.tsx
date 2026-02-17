@@ -48,15 +48,15 @@ export function Footer() {
             <Link href="/" className="flex items-center gap-3 mb-6">
               <div className="w-14 h-14 relative bg-white rounded-lg p-1">
                 <Image
-                  src="/images/logo.jpg"
-                  alt="Om Chabahil Dental"
+                  src={settings.logo || '/images/logo.jpg'}
+                  alt={settings.siteName || 'Om Chabahil Dental'}
                   fill
                   className="object-contain"
                 />
               </div>
               <div>
                 <h2 className="font-heading font-bold text-lg leading-tight">
-                  Om Chabahil Dental
+                  {settings.siteName || 'Om Chabahil Dental'}
                 </h2>
                 <p className="text-xs text-neutral-400">Chabahil, Koteshwor, Kathmandu</p>
               </div>
