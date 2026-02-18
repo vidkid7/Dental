@@ -101,7 +101,7 @@ export function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1 flex-nowrap">
               {navigation.map((item) => (
                 <div
                   key={item.name}
@@ -112,7 +112,7 @@ export function Header() {
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                      'flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap',
                       pathname === item.href || pathname.startsWith(item.href + '/')
                         ? 'text-primary-600 bg-primary-50'
                         : 'text-neutral-700 hover:text-primary-600 hover:bg-neutral-50'
