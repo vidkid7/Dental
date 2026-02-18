@@ -49,14 +49,14 @@ export function Footer() {
               <div className="w-14 h-14 relative bg-white rounded-lg p-1">
                 <Image
                   src={settings.logo || '/images/logo.jpg'}
-                  alt={settings.siteName || 'Om Chabahil Dental'}
+                  alt={settings.siteName || 'Om Chabahil Dental Hospital'}
                   fill
                   className="object-contain"
                 />
               </div>
               <div>
                 <h2 className="font-heading font-bold text-lg leading-tight">
-                  {settings.siteName || 'Om Chabahil Dental'}
+                  {settings.siteName || 'Om Chabahil Dental Hospital'}
                 </h2>
                 <p className="text-xs text-neutral-400">Chabahil, Koteshwor, Kathmandu</p>
               </div>

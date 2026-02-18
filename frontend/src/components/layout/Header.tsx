@@ -85,8 +85,8 @@ export function Header() {
             <Link href="/" className="flex items-center gap-3">
               <div className="w-14 h-14 relative">
                 <Image
-                  src="/images/logo.jpg"
-                  alt="Om Chabahil Dental"
+                  src={settings.logo || '/images/logo.jpg'}
+                  alt={settings.siteName || 'Om Chabahil Dental Hospital'}
                   fill
                   className="object-contain"
                   priority
@@ -94,7 +94,7 @@ export function Header() {
               </div>
               <div className="hidden sm:block">
                 <h1 className="font-heading font-bold text-lg text-neutral-900 leading-tight">
-                  Om Chabahil Dental
+                  {settings.siteName || 'Om Chabahil Dental Hospital'}
                 </h1>
                 <p className="text-xs text-neutral-500">{settings.address?.replace(', Nepal', '')}</p>
               </div>
